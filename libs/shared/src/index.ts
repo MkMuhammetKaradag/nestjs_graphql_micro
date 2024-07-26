@@ -15,3 +15,6 @@ export * from './entities/user.entity';
 
 //interfacs
 export * from './interfaces/user.repository.interface';
+
+// quards
+export * from './guards/auth.guard';

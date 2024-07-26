@@ -20,10 +20,12 @@ import { MongooseModule } from '@nestjs/mongoose';
     GraphQLModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
+
       driver: ApolloDriver,
-      useFactory: (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService) => ({
         playground: Boolean(configService.get('GRAPHQL_PLAYGROUND')),
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        context: ({ req, res }) => ({ req, res }),
       }),
     }),
   ],

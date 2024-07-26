@@ -1,28 +1,109 @@
-import { UserRepositoryInterface } from '@app/shared';
-import { Inject, Injectable } from '@nestjs/common';
+import { UserEntity, UserRepositoryInterface } from '@app/shared';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { NewUserDTO } from './dtos/new-user.dto';
-
+import * as bcrypt from 'bcrypt';
+import { LoginUserDTO } from './dtos/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('UsersRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
+    private readonly jwtService: JwtService,
   ) {}
   getHello(): string {
     return 'Hello World! auth';
   }
+  async findByEmail(email: string): Promise<UserEntity> {
+    return await this.userRepository.findByCondition({
+      where: { email },
+      select: ['email', 'id', 'firstName', 'lastName', 'password'],
+    });
+  }
 
-  async register(newUser: NewUserDTO) {
-    const user = await this.userRepository.save(newUser);
-    return user;
+  async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 12);
+  }
+  async register(newUser: NewUserDTO): Promise<UserEntity> {
+    const { firstName, lastName, email, password } = newUser;
+    const existingUser = await this.findByEmail(email);
+
+    if (existingUser) {
+      throw new ConflictException('An account with that email already exists!');
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+
+    const savedUser = await this.userRepository.save({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+
+    delete savedUser.password;
+    return savedUser;
   }
   async getUsers() {
-    const users = [
-      { id: 1, name: 'John', email: 'john@john.com' },
-      { id: 2, name: 'John1', email: 'john1@john.com' },
-      { id: 3, name: 'John2', email: 'john2@john.com' },
-    ];
+    return await this.userRepository.findAll();
+  }
+  async doesPasswordMatch(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
+  }
 
-    return users;
+  async validateUser(email: string, password: string): Promise<UserEntity> {
+    const user = await this.findByEmail(email);
+
+    const doesUserExist = !!user;
+
+    if (!doesUserExist) return null; //  throw new NotFoundException('User not found!');
+
+    const doesPasswordMatch = await this.doesPasswordMatch(
+      password,
+      user.password,
+    );
+
+    if (!doesPasswordMatch) return null; //throw new UnauthorizedException('Invalid credentials!');
+
+    return user;
+  }
+  async login(loginUser: Readonly<LoginUserDTO>) {
+    const { email, password } = loginUser;
+
+    const user = await this.validateUser(email, password);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials!');
+    }
+
+    delete user.password;
+
+    const jwt = await this.jwtService.signAsync({
+      user,
+    });
+
+    return { user, token: jwt };
+  }
+
+  async verifyJwt(jwt: string): Promise<{ user: UserEntity; exp: number }> {
+    if (!jwt) {
+      throw new UnauthorizedException();
+    }
+
+    try {
+      const { user, exp } = await this.jwtService.verifyAsync(jwt);
+      console.log(user, exp);
+      return { user, exp };
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 }

@@ -1,6 +1,22 @@
-import { Body, Controller, Get, Inject, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { ClientProxy } from '@nestjs/microservices';
+import { Response } from 'express';
+import { catchError, of, switchMap } from 'rxjs';
+import { UserLoginResponse } from './InputTypes/user-object';
+import { UserLoginInput } from './InputTypes/user-Input';
+import { ReturnDocument } from 'typeorm';
+import { AuthGuard } from '@app/shared';
 
 @Controller()
 export class AppController {
@@ -24,5 +40,44 @@ export class AppController {
       },
       {},
     );
+  }
+  @Post('auth/login')
+  
+  async login(@Body() userlogin: UserLoginInput, @Res() res: Response) {
+    // console.log(res);
+
+    const data = this.authService
+      .send(
+        {
+          cmd: 'login',
+        },
+        {
+          ...userlogin,
+        },
+      )
+      .pipe(
+        switchMap((loginUserResponse: UserLoginResponse) => {
+          if (loginUserResponse.token) {
+            res.cookie('token', loginUserResponse.token);
+            res.send({ loginUserResponse });
+          }
+
+          return of(loginUserResponse);
+        }),
+        catchError(() => {
+          throw new HttpException(
+            'User already exists',
+            HttpStatus.BAD_REQUEST,
+          );
+        }),
+      );
+
+    return data;
+  }
+
+  @Get('test_auth')
+  @UseGuards(AuthGuard)
+  async getAuth() {
+    return 'hellomami';
   }
 }

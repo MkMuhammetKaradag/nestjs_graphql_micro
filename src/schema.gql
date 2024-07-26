@@ -3,9 +3,22 @@
 # ------------------------------------------------------
 
 type User {
-  id: String!
-  name: String!
+  id: Float!
+  firstName: String!
+  lastName: String!
   email: String!
+  password: String!
+}
+
+type ErrorType {
+  message: String!
+  code: String
+}
+
+type UserLoginResponse {
+  user: User!
+  token: String!
+  error: ErrorType
 }
 
 type Query {
@@ -14,11 +27,17 @@ type Query {
 
 type Mutation {
   register(userRegisterData: UserRegisterInput!): User!
+  login(userLoginData: UserLoginInput!): UserLoginResponse!
 }
 
 input UserRegisterInput {
   firstName: String!
   lastName: String!
+  email: String!
+  password: String!
+}
+
+input UserLoginInput {
   email: String!
   password: String!
 }
