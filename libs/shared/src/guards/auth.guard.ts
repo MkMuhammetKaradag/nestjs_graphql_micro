@@ -52,7 +52,7 @@ export class AuthGuard implements CanActivate {
     const headers = kHeaders ? request[kHeaders] : {};
     const cookieHeader = headers.cookie;
     const token = getCookie(cookieHeader, 'token');
-    console.log('Token:', token);
+    // console.log('Token:', token);
     const authHeader = request.headers.authorization as string;
 
     if (!authHeader) return false;
@@ -63,13 +63,13 @@ export class AuthGuard implements CanActivate {
     const [, jwt] = authHeaderParts;
 
     return this.authService.send({ cmd: 'verify-jwt' }, { jwt }).pipe(
-      switchMap(({ exp }) => {
+      switchMap(({ user, exp }) => {
         if (!exp) return of(false);
 
         const TOKEN_EXP_MS = exp * 1000;
 
         const isJwtValid = Date.now() < TOKEN_EXP_MS;
-
+        request.user = user;
         return of(isJwtValid);
       }),
       catchError(() => {

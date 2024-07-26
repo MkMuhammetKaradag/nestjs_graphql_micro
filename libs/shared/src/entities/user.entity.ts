@@ -11,6 +11,9 @@ export class UserEntity {
   @Column()
   lastName: string;
 
+  @Column('text', { array: true, default: ['user'] }) // Varsayılan rol 'user'
+  roles: string[];
+
   @Column({ unique: true })
   email: string;
 

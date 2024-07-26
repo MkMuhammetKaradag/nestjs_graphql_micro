@@ -10,6 +10,8 @@ export class UserRegisterInput {
   email: string;
   @Field()
   password: string;
+  @Field((type) => [String], { nullable: true })
+  roles?: string[];
 }
 
 @InputType()

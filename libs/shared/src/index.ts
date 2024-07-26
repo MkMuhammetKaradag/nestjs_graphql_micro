@@ -15,6 +15,10 @@ export * from './entities/user.entity';
 
 //interfacs
 export * from './interfaces/user.repository.interface';
+export * from './interfaces/user-request.interface';
+export * from './interfaces/user-jwt.interface';
 
 // quards
 export * from './guards/auth.guard';
+export * from './guards/role.guard';
+export * from './guards/roles.decorator';

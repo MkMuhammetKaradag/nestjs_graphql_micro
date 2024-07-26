@@ -8,6 +8,7 @@ type User {
   lastName: String!
   email: String!
   password: String!
+  roles: [String!]
 }
 
 type ErrorType {
@@ -22,6 +23,8 @@ type UserLoginResponse {
 }
 
 type Query {
+  getAdminData: String!
+  getUserData: String!
   getUsers: [User!]!
 }
 
@@ -35,6 +38,7 @@ input UserRegisterInput {
   lastName: String!
   email: String!
   password: String!
+  roles: [String!]
 }
 
 input UserLoginInput {

@@ -12,4 +12,7 @@ export class User {
   email: string;
   @Field()
   password: string;
+
+  @Field((type) => [String], { nullable: true })
+  roles?: string[];
 }

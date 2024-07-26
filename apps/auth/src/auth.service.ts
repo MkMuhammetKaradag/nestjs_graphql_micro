@@ -1,5 +1,6 @@
-import { UserEntity, UserRepositoryInterface } from '@app/shared';
+import { UserEntity, UserJwt, UserRepositoryInterface } from '@app/shared';
 import {
+  BadRequestException,
   ConflictException,
   Inject,
   Injectable,
@@ -22,7 +23,7 @@ export class AuthService {
   async findByEmail(email: string): Promise<UserEntity> {
     return await this.userRepository.findByCondition({
       where: { email },
-      select: ['email', 'id', 'firstName', 'lastName', 'password'],
+      select: ['email', 'id', 'firstName', 'lastName', 'password', 'roles'],
     });
   }
 
@@ -30,7 +31,7 @@ export class AuthService {
     return bcrypt.hash(password, 12);
   }
   async register(newUser: NewUserDTO): Promise<UserEntity> {
-    const { firstName, lastName, email, password } = newUser;
+    const { firstName, lastName, email, password, roles } = newUser;
     const existingUser = await this.findByEmail(email);
 
     if (existingUser) {
@@ -43,6 +44,7 @@ export class AuthService {
       firstName,
       lastName,
       email,
+      roles,
       password: hashedPassword,
     });
 
@@ -100,10 +102,20 @@ export class AuthService {
 
     try {
       const { user, exp } = await this.jwtService.verifyAsync(jwt);
-      console.log(user, exp);
+      // console.log(user, exp);
       return { user, exp };
     } catch (error) {
       throw new UnauthorizedException();
+    }
+  }
+
+  async getUserFromHeader(jwt: string): Promise<UserJwt> {
+    if (!jwt) return;
+
+    try {
+      return this.jwtService.decode(jwt) as UserJwt;
+    } catch (error) {
+      throw new BadRequestException();
     }
   }
 }

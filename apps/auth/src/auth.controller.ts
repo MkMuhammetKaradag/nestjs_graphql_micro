@@ -10,6 +10,9 @@ import { SharedService } from '@app/shared';
 import { NewUserDTO } from './dtos/new-user.dto';
 import { LoginUserDTO } from './dtos/login-user.dto';
 import { JwtGuard } from './jwt.guard';
+import { RolesGuard } from '../../../libs/shared/src/guards/role.guard';
+import { Roles } from '../../../libs/shared/src/guards/roles.decorator';
+import { Query } from '@nestjs/graphql';
 
 @Controller()
 export class AuthController {
@@ -24,6 +27,8 @@ export class AuthController {
   getHello(): string {
     return this.authService.getHello();
   }
+
+  
 
   @MessagePattern({ cmd: 'get_users' })
   async getUser(@Ctx() context: RmqContext) {
@@ -55,14 +60,23 @@ export class AuthController {
   @MessagePattern({
     cmd: 'verify-jwt',
   })
-  // @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard)
   async verifyJwt(
     @Ctx() context: RmqContext,
     @Payload() payload: { jwt: string },
   ) {
-
     this.sharedService.acknowledgeMessage(context);
 
     return this.authService.verifyJwt(payload.jwt);
+  }
+
+  @MessagePattern({ cmd: 'decode-jwt' })
+  async decodeJwt(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { jwt: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.getUserFromHeader(payload.jwt);
   }
 }
