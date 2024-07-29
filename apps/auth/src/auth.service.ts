@@ -16,6 +16,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserDTO } from './dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ActivationDto } from 'apps/api/src/InputTypes/user-Input';
+import { ConfigService } from '@nestjs/config';
 
 interface UserData {
   firstName: string;
@@ -31,6 +32,7 @@ export class AuthService {
     private readonly userRepository: UserRepositoryInterface,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
   getHello(): string {
     return 'Hello World! auth';
@@ -191,5 +193,42 @@ export class AuthService {
     } catch (error) {
       throw new BadRequestException();
     }
+  }
+
+  // generate forgot password link
+  async generateForgotPasswordLink(user: UserEntity) {
+    const forgotPasswordToken = this.jwtService.sign(
+      {
+        user,
+      },
+      {
+        secret: this.configService.get<string>('FORGOT_PASSWORD_SECRET'),
+        expiresIn: '5m',
+      },
+    );
+    return forgotPasswordToken;
+  }
+  // forgot password
+  async forgotPassword(email: string) {
+    const user = await this.findByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found with this email!');
+    }
+    const forgotPasswordToken = await this.generateForgotPasswordLink(user);
+
+    const resetPasswordUrl =
+      this.configService.get<string>('CLIENT_SIDE_URI') +
+      `/reset-password?verify=${forgotPasswordToken}`;
+
+    await this.emailService.sendMail({
+      email,
+      subject: 'Reset your Password!',
+      template: './forgot-password',
+      name: user.firstName + user.lastName,
+      activationCode: resetPasswordUrl,
+    });
+
+    return { message: `Your forgot password request succesful!` };
   }
 }

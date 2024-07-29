@@ -41,7 +41,8 @@ export class AppResolver {
   ) {}
 
   @Subscription(() => User)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
   userAdded() {
     return this.pubSub.asyncIterator(USER_ADDED_EVENT);
   }

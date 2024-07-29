@@ -1,4 +1,5 @@
 import { InputType, Field, ObjectType } from '@nestjs/graphql';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 // import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 @InputType()
@@ -38,4 +39,12 @@ export class ActivationDto {
   @Field()
   // @IsNotEmpty({ message: 'activation code is Required' })w
   activationCode: string;
+}
+
+@InputType()
+export class ForgotPasswordDto {
+  @Field()
+  @IsNotEmpty({ message: 'Email is required.' })
+  @IsEmail({}, { message: 'Email must be valid.' })
+  email: string;
 }

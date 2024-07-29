@@ -42,7 +42,7 @@ export class AuthController {
   })
   async register(@Ctx() context: RmqContext, @Payload() newUser: NewUserDTO) {
     this.sharedService.acknowledgeMessage(context);
-    
+
     return this.authService.register(newUser);
   }
 
@@ -90,5 +90,15 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
 
     return this.authService.getUserFromHeader(payload.jwt);
+  }
+
+  @MessagePattern({ cmd: 'forgot-password' })
+  async forgotPassword(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { email: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.forgotPassword(payload.email);
   }
 }
