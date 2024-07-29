@@ -1,4 +1,11 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Context,
+  Mutation,
+  Query,
+  Resolver,
+  Subscription,
+} from '@nestjs/graphql';
 import { User } from './entities/user.entity';
 import {
   HttpException,
@@ -13,7 +20,7 @@ import {
   UserLoginInput,
   UserRegisterInput,
 } from './InputTypes/user-Input';
-import { AuthGuard, Roles, RolesGuard, UserEntity } from '@app/shared';
+import { AuthGuard, PUB_SUB, Roles, RolesGuard, UserEntity } from '@app/shared';
 import {
   ActivationResponse,
   RegisterResponse,
@@ -22,13 +29,22 @@ import {
 import { Request, Response } from 'express';
 import { catchError, of, switchMap } from 'rxjs';
 import { UserInterceptor } from '@app/shared/interceptors/user.interceptor';
-
+import { RedisPubSub } from 'graphql-redis-subscriptions';
+const USER_ADDED_EVENT = 'userAdded';
 @Resolver('app')
 export class AppResolver {
   constructor(
     @Inject('AUTH_SERVICE')
     private readonly authService: ClientProxy,
+
+    @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
+
+  @Subscription(() => User)
+  @UseGuards(AuthGuard)
+  userAdded() {
+    return this.pubSub.asyncIterator(USER_ADDED_EVENT);
+  }
 
   @Query(() => String)
   // @UseInterceptors(UserInterceptor) // auth guardı manipüle yapar   Interceptor'lar, bir istek işlenmeden önce intercept metodunu çağırır ve isteğin işlenmesini durdurabilir veya değiştirebilir. next.handle() çağrıldığında istek işlenmeye devam eder ve yanıt dönmeden önce tekrar bir işlem yapılabilir.
@@ -75,14 +91,32 @@ export class AppResolver {
     @Args('activationInput') activationDto: ActivationDto,
     @Context() context: { res: Response },
   ) {
-    return this.authService.send(
-      {
-        cmd: 'activate_user',
-      },
-      {
-        ...activationDto,
-      },
-    );
+    return this.authService
+      .send(
+        {
+          cmd: 'activate_user',
+        },
+        {
+          ...activationDto,
+        },
+      )
+      .pipe(
+        switchMap((data) => {
+          this.pubSub.publish(USER_ADDED_EVENT, {
+            userAdded: {
+              ...data.user,
+            },
+          });
+          console.log('pip user', data.user);
+          return of(data);
+        }),
+        catchError(() => {
+          throw new HttpException(
+            'User already exists',
+            HttpStatus.BAD_REQUEST,
+          );
+        }),
+      );
   }
 
   @Mutation(() => UserLoginResponse)

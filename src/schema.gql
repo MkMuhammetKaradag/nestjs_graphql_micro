@@ -61,3 +61,7 @@ input UserLoginInput {
   email: String!
   password: String!
 }
+
+type Subscription {
+  userAdded: User!
+}

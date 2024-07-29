@@ -3,6 +3,7 @@ export * from './modules/shared.module';
 export * from './modules/mongodb.module';
 export * from './modules/postgresdb.module';
 export * from './modules/email.module';
+export * from './modules/pubSub.module';
 // schemas
 export * from './schemas/user.schema';
 // Services

@@ -40,21 +40,21 @@ export class AuthGuard implements CanActivate {
       return false;
     }
     const gqlContext = GqlExecutionContext.create(context);
-
     const request =
       context.getType().toString() !== 'graphql'
         ? context.switchToHttp().getRequest()
         : gqlContext.getContext().req;
-    const symbols = Object.getOwnPropertySymbols(request);
-    const kHeaders = symbols.find(
-      (symbol) => symbol.toString() === 'Symbol(kHeaders)',
-    );
-    const headers = kHeaders ? request[kHeaders] : {};
-    const cookieHeader = headers.cookie;
-    const token = getCookie(cookieHeader, 'token');
+
+    // const symbols = Object.getOwnPropertySymbols(request);
+    // const kHeaders = symbols.find(
+    //   (symbol) => symbol.toString() === 'Symbol(kHeaders)',
+    // );
+    // const headers = kHeaders ? request[kHeaders] : {};
+    // const cookieHeader = headers.cookie;
+    // const token = getCookie(cookieHeader, 'token');
     // console.log('Token:', token);
     const authHeader = request.headers.authorization as string;
-
+    // console.log(authHeader, 'mami:');
     if (!authHeader) return false;
     const authHeaderParts = (authHeader as string).split(' ');
 
