@@ -28,8 +28,6 @@ export class AuthController {
     return this.authService.getHello();
   }
 
-  
-
   @MessagePattern({ cmd: 'get_users' })
   async getUser(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
@@ -44,10 +42,24 @@ export class AuthController {
   })
   async register(@Ctx() context: RmqContext, @Payload() newUser: NewUserDTO) {
     this.sharedService.acknowledgeMessage(context);
-
+    
     return this.authService.register(newUser);
   }
 
+  @MessagePattern({
+    cmd: 'activate_user',
+  })
+  async activateUser(
+    @Ctx() context: RmqContext,
+    @Payload()
+    activationDto: {
+      activationToken: string;
+      activationCode: string;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.authService.activateUser(activationDto);
+  }
   @MessagePattern({
     cmd: 'login',
   })

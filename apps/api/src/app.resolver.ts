@@ -8,9 +8,17 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { UserLoginInput, UserRegisterInput } from './InputTypes/user-Input';
+import {
+  ActivationDto,
+  UserLoginInput,
+  UserRegisterInput,
+} from './InputTypes/user-Input';
 import { AuthGuard, Roles, RolesGuard, UserEntity } from '@app/shared';
-import { UserLoginResponse } from './InputTypes/user-object';
+import {
+  ActivationResponse,
+  RegisterResponse,
+  UserLoginResponse,
+} from './InputTypes/user-object';
 import { Request, Response } from 'express';
 import { catchError, of, switchMap } from 'rxjs';
 import { UserInterceptor } from '@app/shared/interceptors/user.interceptor';
@@ -50,7 +58,7 @@ export class AppResolver {
     );
   }
 
-  @Mutation(() => User)
+  @Mutation(() => RegisterResponse)
   async register(@Args('userRegisterData') userRegister: UserRegisterInput) {
     return this.authService.send(
       {
@@ -58,6 +66,21 @@ export class AppResolver {
       },
       {
         ...userRegister,
+      },
+    );
+  }
+
+  @Mutation(() => ActivationResponse)
+  async activateUser(
+    @Args('activationInput') activationDto: ActivationDto,
+    @Context() context: { res: Response },
+  ) {
+    return this.authService.send(
+      {
+        cmd: 'activate_user',
+      },
+      {
+        ...activationDto,
       },
     );
   }

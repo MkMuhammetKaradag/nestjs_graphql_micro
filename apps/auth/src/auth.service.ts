@@ -1,4 +1,9 @@
-import { UserEntity, UserJwt, UserRepositoryInterface } from '@app/shared';
+import {
+  EmailService,
+  UserEntity,
+  UserJwt,
+  UserRepositoryInterface,
+} from '@app/shared';
 import {
   BadRequestException,
   ConflictException,
@@ -10,16 +15,43 @@ import { NewUserDTO } from './dtos/new-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDTO } from './dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { ActivationDto } from 'apps/api/src/InputTypes/user-Input';
+
+interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles?: string[];
+  password: string;
+}
 @Injectable()
 export class AuthService {
   constructor(
     @Inject('UsersRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
   getHello(): string {
     return 'Hello World! auth';
   }
+
+  //create activate token
+  async createActivateToken(user: UserData) {
+    const activationCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const token = await this.jwtService.signAsync(
+      {
+        user,
+        activationCode,
+      },
+      {
+        expiresIn: '5m',
+      },
+    );
+
+    return { token, activationCode };
+  }
+
   async findByEmail(email: string): Promise<UserEntity> {
     return await this.userRepository.findByCondition({
       where: { email },
@@ -30,7 +62,7 @@ export class AuthService {
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 12);
   }
-  async register(newUser: NewUserDTO): Promise<UserEntity> {
+  async register(newUser: NewUserDTO) {
     const { firstName, lastName, email, password, roles } = newUser;
     const existingUser = await this.findByEmail(email);
 
@@ -39,18 +71,60 @@ export class AuthService {
     }
 
     const hashedPassword = await this.hashPassword(password);
+    newUser.password = hashedPassword;
+    const createActivation = await this.createActivateToken(newUser);
+    const activationCode = createActivation.activationCode;
 
-    const savedUser = await this.userRepository.save({
+    this.emailService.sendMail({
+      email,
+      subject: 'activate code',
+      template: './activation-mail',
+      name: firstName + lastName,
+      activationCode,
+    });
+
+    // const savedUser = await this.userRepository.save({
+    //   firstName,
+    //   lastName,
+    //   email,
+    //   roles,
+    //   password: hashedPassword,
+    // });
+
+    // delete savedUser.password;
+
+    return { activation_token: createActivation.token };
+  }
+  async activateUser(activationDto: ActivationDto) {
+    const { activationCode, activationToken } = activationDto;
+
+    // console.log(activationCode);
+    const newUser: { user: UserData; activationCode: string } =
+      (await this.jwtService.verifyAsync(activationToken)) as {
+        user: UserData;
+        activationCode: string;
+      };
+
+    console.log(newUser);
+
+    if (newUser.activationCode !== activationCode) {
+      throw new BadRequestException('Invalid activation code');
+    }
+
+    const { firstName, lastName, email, password, roles } = newUser.user;
+
+    const user = await this.userRepository.save({
       firstName,
       lastName,
       email,
       roles,
-      password: hashedPassword,
+      password,
     });
 
-    delete savedUser.password;
-    return savedUser;
+    delete user.password;
+    return { user };
   }
+
   async getUsers() {
     return await this.userRepository.findAll();
   }

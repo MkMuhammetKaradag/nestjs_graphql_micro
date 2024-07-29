@@ -22,6 +22,16 @@ type UserLoginResponse {
   error: ErrorType
 }
 
+type RegisterResponse {
+  activation_token: String!
+  error: ErrorType
+}
+
+type ActivationResponse {
+  user: User
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -29,7 +39,8 @@ type Query {
 }
 
 type Mutation {
-  register(userRegisterData: UserRegisterInput!): User!
+  register(userRegisterData: UserRegisterInput!): RegisterResponse!
+  activateUser(activationInput: ActivationDto!): ActivationResponse!
   login(userLoginData: UserLoginInput!): UserLoginResponse!
 }
 
@@ -39,6 +50,11 @@ input UserRegisterInput {
   email: String!
   password: String!
   roles: [String!]
+}
+
+input ActivationDto {
+  activationToken: String!
+  activationCode: String!
 }
 
 input UserLoginInput {
