@@ -11,6 +11,12 @@ type User {
   roles: [String!]
 }
 
+type Product {
+  id: Float!
+  name: String!
+  price: Float!
+}
+
 type ErrorType {
   message: String!
   code: String
@@ -42,10 +48,16 @@ type ResetPasswordResponse {
   error: ErrorType
 }
 
+type GetProductsResponse {
+  products: [Product!]
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
   getUsers: [User!]!
+  getProducts: GetProductsResponse!
 }
 
 type Mutation {

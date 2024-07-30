@@ -16,6 +16,10 @@ import * as cookieParser from 'cookie-parser';
       isGlobal: true,
     }),
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
+    SharedModule.registerRmq(
+      'PRODUCT_SERVICE',
+      process.env.RABBITMQ_PRODUCT_QUEUE,
+    ),
 
     GraphQLModule.forRootAsync({
       imports: [ConfigModule],

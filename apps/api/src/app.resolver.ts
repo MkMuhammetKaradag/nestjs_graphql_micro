@@ -26,6 +26,7 @@ import { AuthGuard, PUB_SUB, Roles, RolesGuard, UserEntity } from '@app/shared';
 import {
   ActivationResponse,
   ForgotPasswordResponse,
+  GetProductsResponse,
   RegisterResponse,
   ResetPasswordResponse,
   UserLoginResponse,
@@ -40,6 +41,8 @@ export class AppResolver {
   constructor(
     @Inject('AUTH_SERVICE')
     private readonly authService: ClientProxy,
+    @Inject('PRODUCT_SERVICE')
+    private readonly productService: ClientProxy,
 
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
@@ -181,6 +184,16 @@ export class AppResolver {
       {
         ...resetPasswordDto,
       },
+    );
+  }
+
+  @Query(() => GetProductsResponse)
+  async getProducts() {
+    return this.productService.send(
+      {
+        cmd: 'get-product',
+      },
+      {},
     );
   }
 }

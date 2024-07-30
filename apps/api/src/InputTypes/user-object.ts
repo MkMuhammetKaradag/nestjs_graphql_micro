@@ -1,5 +1,6 @@
 import { InputType, Field, ObjectType } from '@nestjs/graphql';
 import { User } from '../entities/user.entity';
+import { Product } from '../entities/product.entity';
 
 @ObjectType()
 export class ErrorType {
@@ -38,7 +39,6 @@ export class ActivationResponse {
   error?: ErrorType;
 }
 
-
 @ObjectType()
 export class ForgotPasswordResponse {
   @Field()
@@ -51,6 +51,15 @@ export class ForgotPasswordResponse {
 export class ResetPasswordResponse {
   @Field(() => User)
   user: User | unknown;
+
+  @Field(() => ErrorType, { nullable: true })
+  error?: ErrorType;
+}
+
+@ObjectType()
+export class GetProductsResponse {
+  @Field(() => [Product], { nullable: true })
+  products: Product[];
 
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
