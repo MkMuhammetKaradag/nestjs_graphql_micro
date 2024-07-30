@@ -44,3 +44,22 @@ export class CreateProductDto {
   })
   name: string;
 }
+
+@InputType()
+export class GetProductsDto {
+  @Field({ nullable: true })
+  @MaxLength(200, {
+    message: 'description is too long',
+  })
+  keyword: string;
+
+  @Field({ nullable: true })
+  @IsInt()
+  @Min(0)
+  take: number;
+
+  @Field({ nullable: true })
+  @IsInt()
+  @Min(0)
+  skip: number;
+}

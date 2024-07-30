@@ -47,7 +47,6 @@ export class AppResolver {
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
 
-  
   @Subscription(() => User)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('user')
@@ -188,16 +187,5 @@ export class AppResolver {
     );
   }
 
-  @Query(() => GetProductsResponse)
-  async getProducts() {
-    return this.productService.send(
-      {
-        cmd: 'get-product',
-      },
-      {},
-    );
-  }
   // Auth End
-
-
 }

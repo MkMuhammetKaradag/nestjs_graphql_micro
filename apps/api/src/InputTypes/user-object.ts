@@ -60,7 +60,8 @@ export class ResetPasswordResponse {
 export class GetProductsResponse {
   @Field(() => [Product], { nullable: true })
   products: Product[];
-
+  @Field({ nullable: true })
+  total: number;
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
 }

@@ -34,7 +34,10 @@ export abstract class BaseAbstractRepository<T extends HasId>
   public createMany(data: DeepPartial<T>[]): T[] {
     return this.entity.create(data);
   }
-  public update(id: any, data: QueryDeepPartialEntity<T>): Promise<UpdateResult> {
+  public update(
+    id: any,
+    data: QueryDeepPartialEntity<T>,
+  ): Promise<UpdateResult> {
     const options: FindOptionsWhere<T> = {
       id: id,
     };
@@ -65,5 +68,11 @@ export abstract class BaseAbstractRepository<T extends HasId>
   }
   public async preload(entityLike: DeepPartial<T>): Promise<T> {
     return await this.entity.preload(entityLike);
+  }
+
+  public async pagination(
+    options?: FindManyOptions<T>,
+  ): Promise<[T[], number]> {
+    return await this.entity.findAndCount(options);
   }
 }

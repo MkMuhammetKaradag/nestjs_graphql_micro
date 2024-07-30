@@ -2,6 +2,7 @@ import { ProductRepositoryInterface } from '@app/shared/interfaces/product-repos
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateProductDTO } from './dtos/create-product.dto';
 import { UserRepositoryInterface } from '@app/shared';
+import { Like } from 'typeorm';
 
 @Injectable()
 export class ProductService {
@@ -15,20 +16,22 @@ export class ProductService {
   getHello(): string {
     return 'Hello World!';
   }
-  getProduct() {
-    const products = [
-      {
-        id: 1,
-        name: 'Product 1',
-        price: 10.99,
-      },
-      {
-        id: 2,
-        name: 'Product 2',
-        price: 10.2,
-      },
-    ];
-    return { products };
+  async getProduct(paginationOptions: {
+    take: number;
+    skip: number;
+    keyword: string;
+  }) {
+    const take = paginationOptions.take || 10;
+    const skip = paginationOptions.skip || 10;
+    const keyword = paginationOptions.keyword || '';
+    const [products, total] = await this.productRepository.pagination({
+      where: { name: Like('%' + keyword + '%') },
+      order: { name: 'DESC' },
+      take: take,
+      skip: skip,
+    });
+
+    return { products, total };
   }
 
   async createProduct(createProductDto: CreateProductDTO) {

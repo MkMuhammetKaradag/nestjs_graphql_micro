@@ -54,6 +54,7 @@ type ResetPasswordResponse {
 
 type GetProductsResponse {
   products: [Product!]
+  total: Float
   error: ErrorType
 }
 
@@ -66,7 +67,13 @@ type Query {
   getAdminData: String!
   getUserData: String!
   getUsers: [User!]!
-  getProducts: GetProductsResponse!
+  getProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
+}
+
+input GetProductsDto {
+  keyword: String
+  take: Float
+  skip: Float
 }
 
 type Mutation {
