@@ -4,9 +4,11 @@ import {
   FindOneOptions,
   FindOptionsWhere,
   Repository,
+  UpdateResult,
 } from 'typeorm';
 
 import { BaseInterfaceRepository } from './base.interface.repository';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 interface HasId {
   id: number;
@@ -31,6 +33,12 @@ export abstract class BaseAbstractRepository<T extends HasId>
   }
   public createMany(data: DeepPartial<T>[]): T[] {
     return this.entity.create(data);
+  }
+  public update(id: any, data: QueryDeepPartialEntity<T>): Promise<UpdateResult> {
+    const options: FindOptionsWhere<T> = {
+      id: id,
+    };
+    return this.entity.update(options, data);
   }
 
   public async findOneById(id: any): Promise<T> {

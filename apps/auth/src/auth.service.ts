@@ -231,4 +231,29 @@ export class AuthService {
 
     return { message: `Your forgot password request succesful!` };
   }
+
+  async resetPassword(resetPasswordDto: {
+    password: string;
+    activationToken: string;
+  }) {
+    const { password, activationToken } = resetPasswordDto;
+
+    const decoded = await this.jwtService.decode(activationToken);
+
+    if (!decoded || decoded?.exp * 1000 < Date.now()) {
+      // ||decoded?.exp * 1000 < Date.now()
+      throw new BadRequestException('Invalid token!');
+    }
+    const user = await this.findByEmail(decoded.user.email);
+    user.password = await this.hashPassword(password);
+    await this.userRepository.save(user);
+
+    // const hashedPassword = await this.hashPassword(password);
+
+    // // const user = await this.userRepository.update(decoded.user.id, {
+    // //   password: hashedPassword,
+    // // });
+
+    return { user };
+  }
 }

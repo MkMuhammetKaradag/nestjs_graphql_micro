@@ -17,13 +17,17 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import {
   ActivationDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
   UserLoginInput,
   UserRegisterInput,
 } from './InputTypes/user-Input';
 import { AuthGuard, PUB_SUB, Roles, RolesGuard, UserEntity } from '@app/shared';
 import {
   ActivationResponse,
+  ForgotPasswordResponse,
   RegisterResponse,
+  ResetPasswordResponse,
   UserLoginResponse,
 } from './InputTypes/user-object';
 import { Request, Response } from 'express';
@@ -150,5 +154,33 @@ export class AppResolver {
           );
         }),
       );
+  }
+
+  @Mutation(() => ForgotPasswordResponse)
+  async forgotPassword(
+    @Args('forgotPasswordInput') forgotPasswordDto: ForgotPasswordDto,
+  ) {
+    return this.authService.send(
+      {
+        cmd: 'forgot-password',
+      },
+      {
+        email: forgotPasswordDto.email,
+      },
+    );
+  }
+
+  @Mutation(() => ResetPasswordResponse)
+  async resetPassword(
+    @Args('resetPasswordInput') resetPasswordDto: ResetPasswordDto,
+  ) {
+    return this.authService.send(
+      {
+        cmd: 'reset-password',
+      },
+      {
+        ...resetPasswordDto,
+      },
+    );
   }
 }

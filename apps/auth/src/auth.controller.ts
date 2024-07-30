@@ -101,4 +101,14 @@ export class AuthController {
 
     return this.authService.forgotPassword(payload.email);
   }
+
+  @MessagePattern({ cmd: 'reset-password' })
+  async resetPassword(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { password: string; activationToken: string },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.authService.resetPassword(payload);
+  }
 }

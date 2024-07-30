@@ -32,6 +32,16 @@ type ActivationResponse {
   error: ErrorType
 }
 
+type ForgotPasswordResponse {
+  message: String!
+  error: ErrorType
+}
+
+type ResetPasswordResponse {
+  user: User!
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -42,6 +52,8 @@ type Mutation {
   register(userRegisterData: UserRegisterInput!): RegisterResponse!
   activateUser(activationInput: ActivationDto!): ActivationResponse!
   login(userLoginData: UserLoginInput!): UserLoginResponse!
+  forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
+  resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
 }
 
 input UserRegisterInput {
@@ -60,6 +72,15 @@ input ActivationDto {
 input UserLoginInput {
   email: String!
   password: String!
+}
+
+input ForgotPasswordDto {
+  email: String!
+}
+
+input ResetPasswordDto {
+  password: String!
+  activationToken: String!
 }
 
 type Subscription {
