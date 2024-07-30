@@ -9,6 +9,7 @@ import { join } from 'path';
 // import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core';
 import { AppResolver } from './app.resolver';
 import * as cookieParser from 'cookie-parser';
+import { ProductResolver } from './resolvers/product.resolver';
 
 @Module({
   imports: [
@@ -63,6 +64,6 @@ import * as cookieParser from 'cookie-parser';
     PubSubModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppResolver],
+  providers: [AppService, AppResolver, ProductResolver],
 })
 export class AppModule {}

@@ -47,6 +47,7 @@ export class AppResolver {
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
 
+  
   @Subscription(() => User)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('user')
@@ -196,4 +197,7 @@ export class AppResolver {
       {},
     );
   }
+  // Auth End
+
+
 }

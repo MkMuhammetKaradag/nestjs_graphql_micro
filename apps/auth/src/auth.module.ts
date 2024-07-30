@@ -14,6 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt-strategy';
 import { JwtGuard } from './jwt.guard';
+import { ProductEntity } from '@app/shared/entities/product.entity';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { JwtGuard } from './jwt.guard';
     SharedModule,
     PostgresDBModule,
     EmailModule,
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, ProductEntity]),
   ],
   controllers: [AuthController],
   providers: [

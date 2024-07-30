@@ -1,7 +1,8 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { Ctx, MessagePattern, RmqContext } from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { SharedService } from '@app/shared';
+import { CreateProductDTO } from './dtos/create-product.dto';
 
 @Controller()
 export class ProductController {
@@ -20,5 +21,10 @@ export class ProductController {
   async getProduct(@Ctx() context: RmqContext) {
     this.sharedService.acknowledgeMessage(context);
     return this.productService.getProduct();
+  }
+
+  @MessagePattern({cmd:"create-product"})
+  async createProduct(@Ctx() context:RmqContext,@Payload() createUser:CreateProductDTO ){
+    return await this.productService.createProduct(createUser)
   }
 }

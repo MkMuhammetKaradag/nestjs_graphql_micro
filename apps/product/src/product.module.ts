@@ -2,7 +2,16 @@ import { Module } from '@nestjs/common';
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { ConfigModule } from '@nestjs/config';
-import { SharedModule, SharedService } from '@app/shared';
+import {
+  PostgresDBModule,
+  ProductsRepository,
+  SharedModule,
+  SharedService,
+  UserEntity,
+  UsersRepository,
+} from '@app/shared';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProductEntity } from '@app/shared/entities/product.entity';
 
 @Module({
   imports: [
@@ -10,6 +19,8 @@ import { SharedModule, SharedService } from '@app/shared';
       isGlobal: true,
     }),
     SharedModule,
+    PostgresDBModule,
+    TypeOrmModule.forFeature([UserEntity, ProductEntity]),
   ],
   controllers: [ProductController],
   providers: [
@@ -20,6 +31,14 @@ import { SharedModule, SharedService } from '@app/shared';
     {
       provide: 'SharedServiceInterface',
       useClass: SharedService,
+    },
+    {
+      provide: 'ProductsRepositoryInterface',
+      useClass: ProductsRepository,
+    },
+    {
+      provide: 'UsersRepositoryInterface',
+      useClass: UsersRepository,
     },
   ],
 })

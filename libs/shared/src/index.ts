@@ -12,6 +12,7 @@ export * from './service/email.service';
 
 //Repositories
 export * from './repositories/user.repository';
+export * from './repositories/product.repository';
 
 // Entities
 export * from './entities/user.entity';
@@ -20,6 +21,7 @@ export * from './entities/user.entity';
 export * from './interfaces/user.repository.interface';
 export * from './interfaces/user-request.interface';
 export * from './interfaces/user-jwt.interface';
+export * from './interfaces/user.repository.interface';
 
 // quards
 export * from './guards/auth.guard';

@@ -13,8 +13,12 @@ type User {
 
 type Product {
   id: Float!
-  name: String!
+  description: String!
   price: Float!
+  quantity: Float!
+  images: [String!]
+  name: String!
+  vendor: User
 }
 
 type ErrorType {
@@ -53,6 +57,11 @@ type GetProductsResponse {
   error: ErrorType
 }
 
+type CreateProductsResponse {
+  product: Product
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -66,6 +75,7 @@ type Mutation {
   login(userLoginData: UserLoginInput!): UserLoginResponse!
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
+  createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!
 }
 
 input UserRegisterInput {
@@ -93,6 +103,13 @@ input ForgotPasswordDto {
 input ResetPasswordDto {
   password: String!
   activationToken: String!
+}
+
+input CreateProductDto {
+  description: String!
+  price: Float!
+  quantity: Float!
+  name: String!
 }
 
 type Subscription {
