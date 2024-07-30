@@ -10,9 +10,14 @@ import { join } from 'path';
 import { AppResolver } from './app.resolver';
 import * as cookieParser from 'cookie-parser';
 import { ProductResolver } from './resolvers/product.resolver';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/',
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -30,6 +35,7 @@ import { ProductResolver } from './resolvers/product.resolver';
       useFactory: async (configService: ConfigService) => ({
         playground: Boolean(configService.get('GRAPHQL_PLAYGROUND')),
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        uploads: false,
         context: ({ req, res, connection }) => {
           if (connection) {
             return { req: connection.context, res };

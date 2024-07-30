@@ -65,3 +65,12 @@ export class GetProductsResponse {
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
 }
+
+@ObjectType()
+export class UploadImagesResponse {
+  @Field((type) => [String], { nullable: true })
+  images: string[];
+
+  @Field(() => ErrorType, { nullable: true })
+  error?: ErrorType;
+}

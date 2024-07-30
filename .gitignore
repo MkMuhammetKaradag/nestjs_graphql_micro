@@ -5,6 +5,7 @@
 /db
 db/data
 /db/data
+/apps/api/public/images
 # Logs
 logs
 *.log
