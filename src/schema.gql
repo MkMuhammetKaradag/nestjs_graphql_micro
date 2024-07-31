@@ -2,15 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type User {
-  id: Float!
-  firstName: String!
-  lastName: String!
-  email: String!
-  password: String!
-  roles: [String!]
-}
-
 type Product {
   id: Float!
   description: String!
@@ -19,6 +10,16 @@ type Product {
   images: [String!]
   name: String!
   vendor: User
+}
+
+type User {
+  id: Float!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  roles: [String!]
+  products: [Product!]
 }
 
 type ErrorType {
@@ -72,6 +73,7 @@ type Query {
   getAdminData: String!
   getUserData: String!
   getUsers: [User!]!
+  getMe: User!
   getProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
   getMyProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
 }

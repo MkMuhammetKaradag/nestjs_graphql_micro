@@ -20,6 +20,6 @@ export class Product {
   @Field()
   name: string;
 
-  @Field({ nullable: true })
-  vendor: User;
+  @Field((type) => User, { nullable: true })
+  vendor?: User;
 }

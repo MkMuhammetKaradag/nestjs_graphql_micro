@@ -37,6 +37,21 @@ export class AuthController {
     return users;
   }
 
+  @MessagePattern({ cmd: 'get-me' })
+  async getMe(
+    @Ctx() context: RmqContext,
+    @Payload()
+    getMeDto: {
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    const user = await this.authService.getMe(getMeDto.userId);
+
+    return user;
+  }
+
   @MessagePattern({
     cmd: 'register',
   })

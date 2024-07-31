@@ -11,6 +11,7 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -79,6 +80,22 @@ export class AppResolver {
         cmd: 'get_users',
       },
       {},
+    );
+  }
+  @Query(() => User)
+  @UseGuards(AuthGuard)
+  async getMe(@Context() context) {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+    return this.authService.send(
+      {
+        cmd: 'get-me',
+      },
+      {
+        userId: req.user.id,
+      },
     );
   }
 
