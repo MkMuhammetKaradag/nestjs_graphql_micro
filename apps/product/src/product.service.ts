@@ -10,6 +10,7 @@ import { CloudinaryService, UserRepositoryInterface } from '@app/shared';
 import { Like } from 'typeorm';
 import { UploadProductImagesDTO } from './dtos/upload-product-images.dto';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { GetMyProductsDTO } from './dtos/get-myProducts.dto';
 @Injectable()
 export class ProductService {
   constructor(
@@ -33,6 +34,24 @@ export class ProductService {
     const keyword = paginationOptions.keyword || '';
     const [products, total] = await this.productRepository.pagination({
       where: { name: Like('%' + keyword + '%') },
+      order: { name: 'DESC' },
+      take: take,
+      skip: skip,
+    });
+
+    return { products, total };
+  }
+
+  async getMyProducts(paginationOptions: GetMyProductsDTO) {
+    const take = paginationOptions.take || 10;
+    const skip = paginationOptions.skip || 0;
+    const keyword = paginationOptions.keyword || '';
+    const [products, total] = await this.productRepository.pagination({
+      where: {
+        name: Like('%' + keyword + '%'),
+        vendor: { id: paginationOptions.userId },
+      },
+      relations: ['vendor'],
       order: { name: 'DESC' },
       take: take,
       skip: skip,
@@ -72,7 +91,7 @@ export class ProductService {
     if (product.vendor.id !== user.id) {
       throw new UnauthorizedException('you are not the owner of this product ');
     }
-  
+
     const imagesUrls = await Promise.all(
       images.map(async (image) => {
         const imageUrl = await this.storeImageAndGetUrl(image);

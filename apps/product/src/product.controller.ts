@@ -10,6 +10,7 @@ import { SharedService } from '@app/shared';
 import { CreateProductDTO } from './dtos/create-product.dto';
 import { GetProductsDTO } from './dtos/get-products.dto';
 import { UploadProductImagesDTO } from './dtos/upload-product-images.dto';
+import { GetMyProductsDTO } from './dtos/get-myProducts.dto';
 
 @Controller()
 export class ProductController {
@@ -31,6 +32,15 @@ export class ProductController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return this.productService.getProduct(getProducts);
+  }
+
+  @MessagePattern({ cmd: 'get-myProducts' })
+  async getMyProducts(
+    @Ctx() context: RmqContext,
+    @Payload() getProducts: GetMyProductsDTO,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.productService.getMyProducts(getProducts);
   }
 
   @MessagePattern({ cmd: 'create-product' })

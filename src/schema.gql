@@ -73,6 +73,7 @@ type Query {
   getUserData: String!
   getUsers: [User!]!
   getProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
+  getMyProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
 }
 
 input GetProductsDto {

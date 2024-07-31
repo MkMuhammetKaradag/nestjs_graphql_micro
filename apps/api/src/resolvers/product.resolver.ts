@@ -29,6 +29,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { join } from 'path';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { Readable } from 'stream';
+import { REQUEST } from '@nestjs/core';
 @Resolver('product')
 export class ProductResolver {
   constructor(
@@ -52,6 +53,28 @@ export class ProductResolver {
       },
       {
         ...getProducts,
+      },
+    );
+  }
+
+  @Query(() => GetProductsResponse)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  async getMyProducts(
+    @Args('getProductsDto') getProducts: GetProductsDto,
+    @Context() context,
+  ) {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+    return this.productService.send(
+      {
+        cmd: 'get-myProducts',
+      },
+      {
+        ...getProducts,
+        userId: req.user.id,
       },
     );
   }
@@ -119,8 +142,6 @@ export class ProductResolver {
         userId: req.user.id,
       },
     );
-
-
   }
   async convertStreamToBase64(stream: Readable): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -136,5 +157,4 @@ export class ProductResolver {
     const base64String = await this.convertStreamToBase64(createReadStream());
     return base64String;
   }
-
 }
