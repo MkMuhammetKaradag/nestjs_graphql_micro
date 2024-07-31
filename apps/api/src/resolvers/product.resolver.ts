@@ -83,7 +83,11 @@ export class ProductResolver {
   async productImagesUpload(
     @Args('productImagesUploadDto')
     productImagesUploadDto: ProductImagesUploadDto,
-    @Args({ name: 'images', type: () => [GraphQLUpload] })
+    @Args({
+      name: 'images',
+      type: () => [GraphQLUpload],
+      nullable: 'itemsAndList',
+    })
     images: GraphQLUpload[],
     @Context() context,
   ) {
@@ -92,10 +96,19 @@ export class ProductResolver {
       throw new ApolloError('user is required', 'USER_REQUIRED');
     }
     if (!images) throw new ApolloError('Image is required', 'IMAGE_REQUIRED');
-    const imageBase64Strings = await Promise.all(
-      images.map(async (image) => await this.handleImageUpload(image)),
-    );
-
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    const imageBase64Strings = (
+      await Promise.all(
+        images.map(async (image) => {
+          const { mimetype } = await image;
+          if (!allowedTypes.includes(mimetype)) {
+            return null;
+          }
+          return await this.handleImageUpload(image);
+        }),
+      )
+    ).filter((item) => item !== null);
+    console.log(imageBase64Strings.length);
     return this.productService.send(
       {
         cmd: 'upload-product-images',
@@ -107,19 +120,7 @@ export class ProductResolver {
       },
     );
 
-    // let urls = [];
-    // try {
-    //   urls = await Promise.all(
-    //     images.map(async (image) => await this.storeImageAndGetUrl(image)),
-    //   );
-    // } catch (error) {
-    //   console.error(error);
-    //   throw new ApolloError('Error uploading image', 'IMAGE_UPLOAD_ERROR');
-    // }
 
-    // return {
-    //   images: urls,
-    // };
   }
   async convertStreamToBase64(stream: Readable): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -135,28 +136,5 @@ export class ProductResolver {
     const base64String = await this.convertStreamToBase64(createReadStream());
     return base64String;
   }
-  // async storeImageAndGetUrl(file: GraphQLUpload) {
-  //   return (await this.cloudinary.uploadImage(file)).url;
-  //   // const { createReadStream, filename } = await file;
-  //   // const uniqueFilename = `${uuidv4()}_${filename}`;
-  //   // const imagePath = join(
-  //   //   process.cwd(),
-  //   //   'apps',
-  //   //   'api',
-  //   //   'public',
-  //   //   'images',
-  //   //   uniqueFilename,
-  //   // );
-  //   // const imageUrl = `http://localhost:${process.env.API_PORT}/images/${uniqueFilename}`;
-  //   // console.log(imagePath);
-  //   // if (!existsSync(join(process.cwd(), 'apps', 'api', 'public', 'images'))) {
-  //   //   mkdirSync(join(process.cwd(), 'apps', 'api', 'public', 'images'), {
-  //   //     recursive: true,
-  //   //   });
-  //   // }
 
-  //   // const readStream = createReadStream();
-  //   // readStream.pipe(createWriteStream(imagePath));
-  //   // return imageUrl;
-  // }
 }

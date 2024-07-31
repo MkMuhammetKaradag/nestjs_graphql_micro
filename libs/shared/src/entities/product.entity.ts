@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
+import { ArrayMaxSize } from 'class-validator';
 
 @Entity('product')
 export class ProductEntity {
@@ -22,6 +23,9 @@ export class ProductEntity {
   @Column()
   quantity: number;
 
+  // @ArrayMaxSize(1, {
+  //   message: 'The images array cannot contain more than 3 elements.',
+  // })
   @Column({ type: 'text', array: true, nullable: true })
   images: string[];
 

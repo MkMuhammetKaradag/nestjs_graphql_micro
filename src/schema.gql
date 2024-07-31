@@ -88,7 +88,7 @@ type Mutation {
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
   createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!
-  productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload!]!): UploadImagesResponse!
+  productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload]): UploadImagesResponse!
 }
 
 input UserRegisterInput {
