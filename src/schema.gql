@@ -59,7 +59,7 @@ type GetProductsResponse {
 }
 
 type UploadImagesResponse {
-  images: [String!]
+  product: Product
   error: ErrorType
 }
 
@@ -88,7 +88,7 @@ type Mutation {
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
   createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!
-  addPhoto(images: [Upload!]!): UploadImagesResponse!
+  productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload!]!): UploadImagesResponse!
 }
 
 input UserRegisterInput {
@@ -123,6 +123,10 @@ input CreateProductDto {
   price: Float!
   quantity: Float!
   name: String!
+}
+
+input ProductImagesUploadDto {
+  id: Float!
 }
 
 """The `Upload` scalar type represents a file upload."""

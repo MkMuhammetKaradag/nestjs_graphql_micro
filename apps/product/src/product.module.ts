@@ -3,6 +3,8 @@ import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { ConfigModule } from '@nestjs/config';
 import {
+  CloudinaryModule,
+  CloudinaryService,
   PostgresDBModule,
   ProductsRepository,
   SharedModule,
@@ -20,6 +22,7 @@ import { ProductEntity } from '@app/shared/entities/product.entity';
     }),
     SharedModule,
     PostgresDBModule,
+    CloudinaryModule,
     TypeOrmModule.forFeature([UserEntity, ProductEntity]),
   ],
   controllers: [ProductController],
@@ -31,6 +34,10 @@ import { ProductEntity } from '@app/shared/entities/product.entity';
     {
       provide: 'SharedServiceInterface',
       useClass: SharedService,
+    },
+    {
+      provide: 'CloudinaryServiceInterface',
+      useClass: CloudinaryService,
     },
     {
       provide: 'ProductsRepositoryInterface',

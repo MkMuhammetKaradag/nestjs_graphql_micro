@@ -1,9 +1,15 @@
 import { ProductRepositoryInterface } from '@app/shared/interfaces/product-repository.interface';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateProductDTO } from './dtos/create-product.dto';
-import { UserRepositoryInterface } from '@app/shared';
+import { CloudinaryService, UserRepositoryInterface } from '@app/shared';
 import { Like } from 'typeorm';
-
+import { UploadProductImagesDTO } from './dtos/upload-product-images.dto';
+import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 @Injectable()
 export class ProductService {
   constructor(
@@ -11,6 +17,7 @@ export class ProductService {
     private readonly productRepository: ProductRepositoryInterface,
     @Inject('UsersRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
+    private cloudinary: CloudinaryService,
   ) {}
 
   getHello(): string {
@@ -22,7 +29,7 @@ export class ProductService {
     keyword: string;
   }) {
     const take = paginationOptions.take || 10;
-    const skip = paginationOptions.skip || 10;
+    const skip = paginationOptions.skip || 0;
     const keyword = paginationOptions.keyword || '';
     const [products, total] = await this.productRepository.pagination({
       where: { name: Like('%' + keyword + '%') },
@@ -44,6 +51,36 @@ export class ProductService {
       quantity,
       vendor,
     });
+    return { product };
+  }
+
+  async storeImageAndGetUrl(file: string) {
+    return (await this.cloudinary.uploadImage(file)).url;
+  }
+  async uploadProductImages(uploadProductImages: UploadProductImagesDTO) {
+    const { images, productId, userId } = uploadProductImages;
+
+    const product = await this.productRepository.findByCondition({
+      where: { id: productId },
+      relations: ['vendor'],
+    });
+    const user = await this.userRepository.findOneById(userId);
+    if (!product || !user) {
+      throw new NotFoundException('user or product not found ');
+    }
+
+    if (product.vendor.id !== user.id) {
+      throw new UnauthorizedException('you are not the owner of this product ');
+    }
+  
+    const imagesUrls = await Promise.all(
+      images.map(async (image) => {
+        const imageUrl = await this.storeImageAndGetUrl(image);
+        return imageUrl;
+      }),
+    );
+    product.images = imagesUrls;
+    await this.productRepository.save(product);
     return { product };
   }
 }

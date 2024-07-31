@@ -63,3 +63,13 @@ export class GetProductsDto {
   @Min(0)
   skip: number;
 }
+
+
+@InputType()
+export class ProductImagesUploadDto {
+  @Field()
+  @IsInt()
+  @Min(1)
+  @IsNotEmpty({ message: 'id is required.' })
+  id: number;
+}

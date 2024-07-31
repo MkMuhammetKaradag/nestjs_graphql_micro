@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PubSubModule, SharedModule, User, UserSchema } from '@app/shared';
+import { CloudinaryModule, PubSubModule, SharedModule, User, UserSchema } from '@app/shared';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
 import { join } from 'path';
@@ -21,6 +21,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    CloudinaryModule,
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
     SharedModule.registerRmq(
       'PRODUCT_SERVICE',

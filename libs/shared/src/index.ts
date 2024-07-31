@@ -4,11 +4,13 @@ export * from './modules/mongodb.module';
 export * from './modules/postgresdb.module';
 export * from './modules/email.module';
 export * from './modules/pubSub.module';
+export * from './modules/cloudinary.module';
 // schemas
 export * from './schemas/user.schema';
 // Services
 export * from './service/shared.service';
 export * from './service/email.service';
+export * from './service/cloudinary.service';
 
 //Repositories
 export * from './repositories/user.repository';
