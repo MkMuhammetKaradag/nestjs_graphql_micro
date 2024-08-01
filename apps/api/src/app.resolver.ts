@@ -8,14 +8,17 @@ import {
 } from '@nestjs/graphql';
 import { User } from './entities/user.entity';
 import {
+  BadRequestException,
   HttpException,
   HttpStatus,
   Inject,
+  NotFoundException,
   UnauthorizedException,
+  UseFilters,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
   ActivationDto,
   ForgotPasswordDto,
@@ -23,7 +26,14 @@ import {
   UserLoginInput,
   UserRegisterInput,
 } from './InputTypes/user-Input';
-import { AuthGuard, PUB_SUB, Roles, RolesGuard, UserEntity } from '@app/shared';
+import {
+  AllRpcExceptionsFilter,
+  AuthGuard,
+  PUB_SUB,
+  Roles,
+  RolesGuard,
+  UserEntity,
+} from '@app/shared';
 import {
   ActivationResponse,
   ForgotPasswordResponse,
@@ -33,9 +43,12 @@ import {
   UserLoginResponse,
 } from './InputTypes/user-object';
 import { Request, Response } from 'express';
-import { catchError, of, switchMap } from 'rxjs';
+import { catchError, firstValueFrom, of, switchMap, throwError } from 'rxjs';
 import { UserInterceptor } from '@app/shared/interceptors/user.interceptor';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { ApolloServer } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
+
 const USER_ADDED_EVENT = 'userAdded';
 @Resolver('app')
 export class AppResolver {
@@ -145,35 +158,38 @@ export class AppResolver {
   }
 
   @Mutation(() => UserLoginResponse)
+  // @UseFilters(AllRpcExceptionsFilter)
   async login(
-    @Args('userLoginData') userlogin: UserLoginInput,
+    @Args('loginInput') userlogin: UserLoginInput,
     @Context() context,
-  ) {
+  ): Promise<UserLoginResponse> {
     const { req, res } = context;
     res.cookie('token', 'testmami');
-    return this.authService
-      .send(
-        {
-          cmd: 'login',
-        },
-        {
-          ...userlogin,
-        },
-      )
-      .pipe(
-        switchMap((loginUserResponse: UserLoginResponse) => {
-          if (loginUserResponse.token) {
-            res.cookie('token', loginUserResponse.token);
-          }
-          return of(loginUserResponse);
-        }),
-        catchError(() => {
-          throw new HttpException(
-            'User already exists',
-            HttpStatus.BAD_REQUEST,
-          );
-        }),
+    try {
+      const data = await firstValueFrom<UserLoginResponse>(
+        this.authService.send(
+          {
+            cmd: 'login',
+          },
+          {
+            ...userlogin,
+          },
+        ),
       );
+
+      // .pipe(
+      //   switchMap((loginUserResponse: UserLoginResponse) => {
+      if (data.token) {
+        res.cookie('token', data.token);
+      }
+
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
   }
 
   @Mutation(() => ForgotPasswordResponse)

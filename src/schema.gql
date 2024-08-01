@@ -87,7 +87,7 @@ input GetProductsDto {
 type Mutation {
   register(userRegisterData: UserRegisterInput!): RegisterResponse!
   activateUser(activationInput: ActivationDto!): ActivationResponse!
-  login(userLoginData: UserLoginInput!): UserLoginResponse!
+  login(loginInput: UserLoginInput!): UserLoginResponse!
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
   createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!

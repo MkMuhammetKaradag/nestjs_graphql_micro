@@ -7,8 +7,10 @@ import {
 import {
   BadRequestException,
   ConflictException,
+  HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { NewUserDTO } from './dtos/new-user.dto';
@@ -17,6 +19,7 @@ import { LoginUserDTO } from './dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ActivationDto } from 'apps/api/src/InputTypes/user-Input';
 import { ConfigService } from '@nestjs/config';
+import { RpcException } from '@nestjs/microservices';
 
 interface UserData {
   firstName: string;
@@ -148,14 +151,24 @@ export class AuthService {
 
     const doesUserExist = !!user;
 
-    if (!doesUserExist) return null; //  throw new NotFoundException('User not found!');
+    if (!doesUserExist) {
+      throw new RpcException({
+        message: 'User NotFound ',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
 
     const doesPasswordMatch = await this.doesPasswordMatch(
       password,
       user.password,
     );
 
-    if (!doesPasswordMatch) return null; //throw new UnauthorizedException('Invalid credentials!');
+    if (!doesPasswordMatch) {
+      throw new RpcException({
+        message: 'Invalid credentials!',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
 
     return user;
   }

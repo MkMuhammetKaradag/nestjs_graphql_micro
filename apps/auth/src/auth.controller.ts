@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   Ctx,
@@ -6,7 +6,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { SharedService } from '@app/shared';
+import { AllRpcExceptionsFilter, SharedService } from '@app/shared';
 import { NewUserDTO } from './dtos/new-user.dto';
 import { LoginUserDTO } from './dtos/login-user.dto';
 import { JwtGuard } from './jwt.guard';
@@ -78,10 +78,12 @@ export class AuthController {
   @MessagePattern({
     cmd: 'login',
   })
+  @UseFilters(AllRpcExceptionsFilter)
   async login(@Ctx() context: RmqContext, @Payload() loginUser: LoginUserDTO) {
     this.sharedService.acknowledgeMessage(context);
 
-    return this.authService.login(loginUser);
+    const data = this.authService.login(loginUser);
+    return data;
   }
 
   @MessagePattern({
