@@ -88,6 +88,7 @@ type Mutation {
   register(userRegisterData: UserRegisterInput!): RegisterResponse!
   activateUser(activationInput: ActivationDto!): ActivationResponse!
   login(loginInput: UserLoginInput!): UserLoginResponse!
+  logout: String!
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
   createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!

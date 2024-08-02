@@ -20,6 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ActivationDto } from 'apps/api/src/InputTypes/user-Input';
 import { ConfigService } from '@nestjs/config';
 import { RpcException } from '@nestjs/microservices';
+import { Response } from 'express';
 
 interface UserData {
   firstName: string;
@@ -190,6 +191,11 @@ export class AuthService {
     return { user, token: jwt };
   }
 
+  async logout(response: Response) {
+    response.clearCookie('access_token');
+    response.clearCookie('refresh_token');
+    return 'successfully logged out ';
+  }
   async verifyJwt(jwt: string): Promise<{ user: UserEntity; exp: number }> {
     if (!jwt) {
       throw new UnauthorizedException();

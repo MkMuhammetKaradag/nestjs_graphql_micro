@@ -10,7 +10,15 @@ async function bootstrap() {
   const PORT = configService.get<number>('API_PORT');
 
   app.enableCors({
-    origin: '*',
+    origin: ['http://localhost:5173'],
+    allowedHeaders: [
+      'Content-Type',
+      'apollo-require-preflight',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+    ],
+    credentials: true,
   });
   app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 3 }));
   app.use(cookieParser());

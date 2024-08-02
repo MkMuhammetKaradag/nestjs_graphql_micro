@@ -13,6 +13,7 @@ import { JwtGuard } from './jwt.guard';
 import { RolesGuard } from '../../../libs/shared/src/guards/role.guard';
 import { Roles } from '../../../libs/shared/src/guards/roles.decorator';
 import { Query } from '@nestjs/graphql';
+import { Response } from 'express';
 
 @Controller()
 export class AuthController {
@@ -83,6 +84,19 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
 
     const data = this.authService.login(loginUser);
+    return data;
+  }
+  @MessagePattern({
+    cmd: 'logout',
+  })
+  @UseFilters(AllRpcExceptionsFilter)
+  async logout(
+    @Ctx() context: RmqContext,
+    @Payload() logoutUser: { response: Response },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    const data = this.authService.logout(logoutUser.response);
     return data;
   }
 

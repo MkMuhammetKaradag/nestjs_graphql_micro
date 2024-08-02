@@ -176,11 +176,8 @@ export class AppResolver {
           },
         ),
       );
-
-      // .pipe(
-      //   switchMap((loginUserResponse: UserLoginResponse) => {
       if (data.token) {
-        res.cookie('token', data.token);
+        res.cookie('mk_session', data.token);
       }
 
       return data;
@@ -189,6 +186,37 @@ export class AppResolver {
       throw new GraphQLError(error.message, {
         extensions: { ...error },
       });
+    }
+  }
+
+  @Mutation(() => String)
+  async logout(@Context() context: { res: Response }) {
+    // try {
+    //   const data = await firstValueFrom<string>(
+    //     this.authService.send(
+    //       {
+    //         cmd: 'logout',
+    //       },
+    //       {
+    //         response: context.res,
+    //       },
+    //     ),
+    //   );
+    //   return data;
+    // } catch (error) {
+    //   throw new GraphQLError(error.message);
+    // }
+    const { res } = context;
+    try {
+      res.clearCookie('mk_session', {
+        path: '/', // Çerezin path ayarı
+        httpOnly: true, // Çerezin httpOnly ayarı (varsa)
+        secure: true, // Çerezin secure ayarı (eğer HTTPS üzerinde çalışıyorsanız)
+        sameSite: 'strict', // Çerezin sameSite ayarı
+      });
+      return 'successfully logged out ';
+    } catch (error) {
+      throw new Error(`Logout failed: ${error.message}`);
     }
   }
 
