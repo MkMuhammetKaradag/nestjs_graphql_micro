@@ -2,7 +2,13 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CloudinaryModule, PubSubModule, SharedModule, User, UserSchema } from '@app/shared';
+import {
+  CloudinaryModule,
+  PubSubModule,
+  SharedModule,
+  User,
+  UserSchema,
+} from '@app/shared';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
 import { join } from 'path';
@@ -47,6 +53,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
         subscriptions: {
           'subscriptions-transport-ws': {
             onConnect: (connectionParams, webSocket, context) => {
+             
               const cookies = connectionParams.cookies
                 ? cookieParser.JSONCookies(connectionParams.cookies)
                 : {};

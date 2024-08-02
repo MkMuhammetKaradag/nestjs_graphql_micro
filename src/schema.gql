@@ -138,4 +138,5 @@ scalar Upload
 
 type Subscription {
   userAdded: User!
+  productCreated: Product!
 }

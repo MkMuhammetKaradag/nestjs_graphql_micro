@@ -1,4 +1,11 @@
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Context,
+  Mutation,
+  Query,
+  Resolver,
+  Subscription,
+} from '@nestjs/graphql';
 
 import { ClientProxy } from '@nestjs/microservices';
 
@@ -19,6 +26,7 @@ import {
   ProductImagesUploadDto,
 } from '../InputTypes/product.Input';
 import {
+  GetProductResponse,
   GetProductsResponse,
   UploadImagesResponse,
 } from '../InputTypes/user-object';
@@ -30,6 +38,11 @@ import { join } from 'path';
 import { createWriteStream, existsSync, mkdirSync } from 'fs';
 import { Readable } from 'stream';
 import { REQUEST } from '@nestjs/core';
+import { Product } from '../entities/product.entity';
+import { firstValueFrom } from 'rxjs';
+
+const PRODUCT_CREATED_EVENT = 'productCreated';
+
 @Resolver('product')
 export class ProductResolver {
   constructor(
@@ -43,6 +56,15 @@ export class ProductResolver {
 
     private cloudinary: CloudinaryService,
   ) {}
+
+  // @Subscription(() => GetProductResponse)
+  @Subscription(() => Product)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  productCreated() {
+
+    return this.pubSub.asyncIterator(PRODUCT_CREATED_EVENT);
+  }
   @Query(() => GetProductsResponse)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
@@ -89,15 +111,26 @@ export class ProductResolver {
     if (!req?.user) {
       throw new BadRequestException();
     }
-    return this.productService.send(
-      {
-        cmd: 'create-product',
-      },
-      {
-        ...createProduct,
-        userId: req.user.id,
-      },
+    const data = await firstValueFrom<CreateProductsResponse>(
+      this.productService.send(
+        {
+          cmd: 'create-product',
+        },
+        {
+          ...createProduct,
+          userId: req.user.id,
+        },
+      ),
     );
+    if (data.product) {
+      this.pubSub.publish(PRODUCT_CREATED_EVENT, {
+        productCreated: {
+          ...data.product,
+        },
+      });
+    }
+
+    return data;
   }
 
   @Mutation(() => UploadImagesResponse)
