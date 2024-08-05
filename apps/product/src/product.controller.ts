@@ -25,15 +25,23 @@ export class ProductController {
   getHello(): string {
     return this.productService.getHello();
   }
-  @MessagePattern({ cmd: 'get-product' })
-  async getProduct(
+  @MessagePattern({ cmd: 'get-products' })
+  async getProducts(
     @Ctx() context: RmqContext,
     @Payload() getProducts: GetProductsDTO,
   ) {
     this.sharedService.acknowledgeMessage(context);
-    return this.productService.getProduct(getProducts);
+    return this.productService.getProducts(getProducts);
   }
 
+  @MessagePattern({ cmd: 'get-product' })
+  async getProduct(
+    @Ctx() context: RmqContext,
+    @Payload() getProduct: { productId: number },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.productService.getProduct(getProduct.productId);
+  }
   @MessagePattern({ cmd: 'get-myProducts' })
   async getMyProducts(
     @Ctx() context: RmqContext,
@@ -53,13 +61,13 @@ export class ProductController {
   }
 
   @MessagePattern({
-    cmd:"upload-product-images"
+    cmd: 'upload-product-images',
   })
   async uploadProductImages(
     @Ctx() context: RmqContext,
-    @Payload() uploadProductImages:UploadProductImagesDTO)
-    {
-      this.sharedService.acknowledgeMessage(context);
-      return await this.productService.uploadProductImages(uploadProductImages);
-    }
+    @Payload() uploadProductImages: UploadProductImagesDTO,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.uploadProductImages(uploadProductImages);
+  }
 }

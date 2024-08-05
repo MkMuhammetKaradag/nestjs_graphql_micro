@@ -22,6 +22,7 @@ import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
 import { CreateProductsResponse } from '../InputTypes/product.object';
 import {
   CreateProductDto,
+  GetProductDto,
   GetProductsDto,
   ProductImagesUploadDto,
 } from '../InputTypes/product.Input';
@@ -62,16 +63,15 @@ export class ProductResolver {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('user')
   productCreated() {
-
     return this.pubSub.asyncIterator(PRODUCT_CREATED_EVENT);
   }
   @Query(() => GetProductsResponse)
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('user')
   async getProducts(@Args('getProductsDto') getProducts: GetProductsDto) {
     return this.productService.send(
       {
-        cmd: 'get-product',
+        cmd: 'get-products',
       },
       {
         ...getProducts,
@@ -100,6 +100,18 @@ export class ProductResolver {
       },
     );
   }
+  @Query(() => GetProductResponse)
+  async getProduct(@Args('getProductDto') getProduct: GetProductDto) {
+    return this.productService.send(
+      {
+        cmd: 'get-product',
+      },
+      {
+        productId: getProduct.id,
+      },
+    );
+  }
+
   @Mutation(() => CreateProductsResponse)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')

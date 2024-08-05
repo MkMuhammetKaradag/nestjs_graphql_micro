@@ -59,6 +59,11 @@ type GetProductsResponse {
   error: ErrorType
 }
 
+type GetProductResponse {
+  product: Product
+  error: ErrorType
+}
+
 type UploadImagesResponse {
   product: Product
   error: ErrorType
@@ -76,6 +81,7 @@ type Query {
   getMe: User!
   getProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
   getMyProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
+  getProduct(getProductDto: GetProductDto!): GetProductResponse!
 }
 
 input GetProductsDto {
@@ -84,9 +90,13 @@ input GetProductsDto {
   skip: Float
 }
 
+input GetProductDto {
+  id: Float!
+}
+
 type Mutation {
-  register(userRegisterData: UserRegisterInput!): RegisterResponse!
-  activateUser(activationInput: ActivationDto!): ActivationResponse!
+  register(userRegisterInput: UserRegisterInput!): RegisterResponse!
+  activateUser(activationInput: ActivationInput!): ActivationResponse!
   login(loginInput: UserLoginInput!): UserLoginResponse!
   logout: String!
   forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
@@ -103,7 +113,7 @@ input UserRegisterInput {
   roles: [String!]
 }
 
-input ActivationDto {
+input ActivationInput {
   activationToken: String!
   activationCode: String!
 }

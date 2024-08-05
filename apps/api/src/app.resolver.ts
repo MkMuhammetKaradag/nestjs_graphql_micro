@@ -20,7 +20,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
-  ActivationDto,
+  ActivationInput,
   ForgotPasswordDto,
   ResetPasswordDto,
   UserLoginInput,
@@ -113,7 +113,7 @@ export class AppResolver {
   }
 
   @Mutation(() => RegisterResponse)
-  async register(@Args('userRegisterData') userRegister: UserRegisterInput) {
+  async register(@Args('userRegisterInput') userRegister: UserRegisterInput) {
     return this.authService.send(
       {
         cmd: 'register',
@@ -126,35 +126,52 @@ export class AppResolver {
 
   @Mutation(() => ActivationResponse)
   async activateUser(
-    @Args('activationInput') activationDto: ActivationDto,
+    @Args('activationInput') activationDto: ActivationInput,
     @Context() context: { res: Response },
   ) {
-    return this.authService
-      .send(
-        {
-          cmd: 'activate_user',
-        },
-        {
-          ...activationDto,
-        },
-      )
-      .pipe(
-        switchMap((data) => {
-          this.pubSub.publish(USER_ADDED_EVENT, {
-            userAdded: {
-              ...data.user,
-            },
-          });
-          console.log('pip user', data.user);
-          return of(data);
-        }),
-        catchError(() => {
-          throw new HttpException(
-            'User already exists',
-            HttpStatus.BAD_REQUEST,
-          );
-        }),
+    try {
+      const data = await firstValueFrom<ActivationResponse>(
+        this.authService.send(
+          {
+            cmd: 'activate_user',
+          },
+          {
+            ...activationDto,
+          },
+        ),
       );
+      if (data.user) {
+        this.pubSub.publish(USER_ADDED_EVENT, {
+          userAdded: {
+            ...data.user,
+          },
+        });
+      }
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+
+    // .pipe(
+    //   switchMap((data) => {
+    //     this.pubSub.publish(USER_ADDED_EVENT, {
+    //       userAdded: {
+    //         ...data.user,
+    //       },
+    //     });
+    //     console.log('pip user', data.user);
+    //     return of(data);
+    //   }),
+    //   catchError(() => {
+    //     throw new HttpException(
+    //       'User already exists',
+    //       HttpStatus.BAD_REQUEST,
+    //     );
+    //   }),
+    // );
   }
 
   @Mutation(() => UserLoginResponse)

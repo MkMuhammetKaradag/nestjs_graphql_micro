@@ -31,7 +31,7 @@ export class UserLoginInput {
 }
 
 @InputType()
-export class ActivationDto {
+export class ActivationInput {
   @Field()
   // @IsNotEmpty({ message: 'activation token is Required' })
   activationToken: string;

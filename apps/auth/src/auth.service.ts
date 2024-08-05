@@ -104,17 +104,17 @@ export class AuthService {
   async activateUser(activationDto: ActivationDto) {
     const { activationCode, activationToken } = activationDto;
 
-    // console.log(activationCode);
     const newUser: { user: UserData; activationCode: string } =
       (await this.jwtService.verifyAsync(activationToken)) as {
         user: UserData;
         activationCode: string;
       };
 
-    console.log(newUser);
-
     if (newUser.activationCode !== activationCode) {
-      throw new BadRequestException('Invalid activation code');
+      throw new RpcException({
+        message: 'Invalid activation code',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
     }
 
     const { firstName, lastName, email, password, roles } = newUser.user;

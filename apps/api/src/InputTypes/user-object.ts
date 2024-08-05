@@ -69,7 +69,7 @@ export class GetProductsResponse {
 @ObjectType()
 export class GetProductResponse {
   @Field(() => Product, { nullable: true })
-  products: Product;
+  product: Product;
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
 }

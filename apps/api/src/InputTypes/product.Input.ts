@@ -64,6 +64,13 @@ export class GetProductsDto {
   skip: number;
 }
 
+@InputType()
+export class GetProductDto {
+  @Field()
+  @IsInt()
+  @Min(0)
+  id: number;
+}
 
 @InputType()
 export class ProductImagesUploadDto {

@@ -24,7 +24,7 @@ export class ProductService {
   getHello(): string {
     return 'Hello World!';
   }
-  async getProduct(paginationOptions: {
+  async getProducts(paginationOptions: {
     take: number;
     skip: number;
     keyword: string;
@@ -40,6 +40,18 @@ export class ProductService {
     });
 
     return { products, total };
+  }
+
+  async getProduct(productId: number) {
+    const product = await this.productRepository.findByCondition({
+      where: { id: productId },
+      select: {
+        vendor: { id: true, firstName: true, lastName: true, email: true }, // Sadece userId alanının id ve name alanlarını çek
+      },
+      relations: ['vendor'],
+    });
+
+    return { product };
   }
 
   async getMyProducts(paginationOptions: GetMyProductsDTO) {
