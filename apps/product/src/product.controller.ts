@@ -82,4 +82,15 @@ export class ProductController {
     this.sharedService.acknowledgeMessage(context);
     return await this.productService.addCommentProduct(addCommentProductInput);
   }
+
+  @MessagePattern({
+    cmd: 'get-comments-product',
+  })
+  async getCommentsProduct(
+    @Ctx() context: RmqContext,
+    @Payload() productId: number,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.getCommentsProduct(productId);
+  }
 }

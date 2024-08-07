@@ -1,6 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Product } from '../entities/product.entity';
 import { ErrorType } from './user-object';
+import { Comment } from '../entities/comment.entity';
 
 @ObjectType()
 export class CreateProductsResponse {
@@ -13,9 +14,8 @@ export class CreateProductsResponse {
 
 @ObjectType()
 export class AddCommentProductResponse {
-  @Field()
-  message: string;
-
+  @Field(() => Comment, { nullable: true })
+  comment: Comment;
 
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;

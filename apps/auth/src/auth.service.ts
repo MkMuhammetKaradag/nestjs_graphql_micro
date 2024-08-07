@@ -140,7 +140,7 @@ export class AuthService {
   async getMe(userId: number) {
     return await this.userRepository.findByCondition({
       where: { id: userId },
-      relations: ['products'],
+      relations: ['products', 'comments', 'comments.product'],
     });
   }
   async doesPasswordMatch(

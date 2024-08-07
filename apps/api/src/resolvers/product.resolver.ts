@@ -46,8 +46,10 @@ import { REQUEST } from '@nestjs/core';
 import { Product } from '../entities/product.entity';
 import { firstValueFrom } from 'rxjs';
 import { GraphQLError } from 'graphql';
+import { Comment } from '../entities/comment.entity';
 
 const PRODUCT_CREATED_EVENT = 'productCreated';
+const CREATE_COMMENT_PRODUCT_EVENT = 'createCommentProduct';
 
 @Resolver('product')
 export class ProductResolver {
@@ -233,11 +235,32 @@ export class ProductResolver {
           },
         ),
       );
+
+      if (data.comment) {
+        this.pubSub.publish(CREATE_COMMENT_PRODUCT_EVENT, {
+          createCommentProduct: {
+            ...data.comment,
+          },
+        });
+      }
       return data;
     } catch (error) {
       throw new GraphQLError(error.message, {
         extensions: { ...error },
       });
     }
+  }
+  @Subscription(() => Comment, {
+    filter: (payload, variables) => {
+      return payload.createCommentProduct.product.id == variables.productId;
+    },
+    resolve: (payload) => {
+      return payload.createCommentProduct; // fonk ismi ile farklı olduğunda addCommentProductSubscription   event değişkenini resolver olarak return ederiz
+    },
+  })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  createCommentProduct(@Args('productId') productId: number) {
+    return this.pubSub.asyncIterator(CREATE_COMMENT_PRODUCT_EVENT);
   }
 }

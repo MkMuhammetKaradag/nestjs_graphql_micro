@@ -135,18 +135,29 @@ export class ProductService {
       });
     }
     try {
-      await this.commentRepository.save({
+      const data = await this.commentRepository.save({
         text: comment,
         user,
         product,
       });
 
-      return { message: 'comment added' };
+      return { comment: data };
     } catch (error) {
       throw new RpcException({
         message: error.message,
         statusCode: HttpStatus.CREATED,
       });
     }
+  }
+
+  async getCommentsProduct(productId: number) {
+    // const product = await this.productRepository.findByCondition({
+    //   where: { id: productId },
+    //   select: {
+    //     vendor: { id: true, firstName: true, lastName: true, email: true }, // Sadece userId alanının id ve name alanlarını çek
+    //   },
+    //   relations: ['vendor', 'comments', 'comments.user'],
+    // });
+    return { comments: ['mami tarafından çekildi'] };
   }
 }

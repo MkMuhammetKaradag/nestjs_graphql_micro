@@ -5,16 +5,11 @@
 type Comment {
   id: Float!
   text: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
   user: User
   product: Product
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type Product {
   id: Float!
@@ -35,6 +30,7 @@ type User {
   password: String!
   roles: [String!]
   products: [Product!]
+  comments: [Comment!]
 }
 
 type ErrorType {
@@ -90,7 +86,7 @@ type CreateProductsResponse {
 }
 
 type AddCommentProductResponse {
-  message: String!
+  comment: Comment
   error: ErrorType
 }
 
@@ -175,4 +171,5 @@ input AddCommentProductInput {
 type Subscription {
   userAdded: User!
   productCreated: Product!
+  createCommentProduct(productId: Float!): Comment!
 }

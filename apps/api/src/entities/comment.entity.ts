@@ -10,10 +10,10 @@ export class Comment {
   text: string;
 
   @Field()
-  createdAt: Date;
+  createdAt: string;
 
   @Field()
-  updatedAt: Date;
+  updatedAt: string;
 
   @Field((type) => User, { nullable: true })
   user?: User;
