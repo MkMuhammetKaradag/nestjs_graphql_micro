@@ -5,9 +5,12 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { ArrayMaxSize } from 'class-validator';
+import { CommentEntity } from './comment.entity';
+import { LikeEntity } from './like.entity';
 
 @Entity('product')
 export class ProductEntity {
@@ -35,6 +38,17 @@ export class ProductEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
   @ManyToOne(() => UserEntity, (userEntity) => userEntity.products)
   vendor: UserEntity;
+
+
+  @OneToMany(() => CommentEntity, (comment) => comment.product)
+  comments: CommentEntity[];
+
+  @OneToMany(() => LikeEntity, (like) => like.product)
+  likes: LikeEntity[];
 }

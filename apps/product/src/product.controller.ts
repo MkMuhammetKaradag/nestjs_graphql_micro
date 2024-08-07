@@ -11,6 +11,7 @@ import { CreateProductDTO } from './dtos/create-product.dto';
 import { GetProductsDTO } from './dtos/get-products.dto';
 import { UploadProductImagesDTO } from './dtos/upload-product-images.dto';
 import { GetMyProductsDTO } from './dtos/get-myProducts.dto';
+import { AddCommentProductInput } from './dtos/add-commentProduct.dto';
 
 @Controller()
 export class ProductController {
@@ -69,5 +70,16 @@ export class ProductController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return await this.productService.uploadProductImages(uploadProductImages);
+  }
+
+  @MessagePattern({
+    cmd: 'add-comment-product',
+  })
+  async addCommentProduct(
+    @Ctx() context: RmqContext,
+    @Payload() addCommentProductInput: AddCommentProductInput,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.addCommentProduct(addCommentProductInput);
   }
 }

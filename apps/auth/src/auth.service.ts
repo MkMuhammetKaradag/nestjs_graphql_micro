@@ -17,7 +17,7 @@ import { NewUserDTO } from './dtos/new-user.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDTO } from './dtos/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
-import { ActivationDto } from 'apps/api/src/InputTypes/user-Input';
+import { ActivationInput } from 'apps/api/src/InputTypes/user-Input';
 import { ConfigService } from '@nestjs/config';
 import { RpcException } from '@nestjs/microservices';
 import { Response } from 'express';
@@ -73,7 +73,10 @@ export class AuthService {
     const existingUser = await this.findByEmail(email);
 
     if (existingUser) {
-      throw new ConflictException('An account with that email already exists!');
+      throw new RpcException({
+        message: 'An account with that email already exists!',
+        statusCode: HttpStatus.CONFLICT,
+      });
     }
 
     const hashedPassword = await this.hashPassword(password);
@@ -101,7 +104,7 @@ export class AuthService {
 
     return { activation_token: createActivation.token };
   }
-  async activateUser(activationDto: ActivationDto) {
+  async activateUser(activationDto: ActivationInput) {
     const { activationCode, activationToken } = activationDto;
 
     const newUser: { user: UserData; activationCode: string } =
@@ -179,7 +182,10 @@ export class AuthService {
     const user = await this.validateUser(email, password);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials!');
+      throw new RpcException({
+        message: 'Invalid credentials!',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     }
 
     delete user.password;
@@ -198,7 +204,10 @@ export class AuthService {
   }
   async verifyJwt(jwt: string): Promise<{ user: UserEntity; exp: number }> {
     if (!jwt) {
-      throw new UnauthorizedException();
+      throw new RpcException({
+        message: 'Invalid credentials!',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     }
 
     try {
@@ -206,7 +215,10 @@ export class AuthService {
       // console.log(user, exp);
       return { user, exp };
     } catch (error) {
-      throw new UnauthorizedException();
+      throw new RpcException({
+        message: 'Invalid credentials!',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
     }
   }
 
@@ -216,7 +228,10 @@ export class AuthService {
     try {
       return this.jwtService.decode(jwt) as UserJwt;
     } catch (error) {
-      throw new BadRequestException();
+      throw new RpcException({
+        message: error.message,
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
     }
   }
 
@@ -238,7 +253,10 @@ export class AuthService {
     const user = await this.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException('User not found with this email!');
+      throw new RpcException({
+        message: 'User not found with this email!',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
     const forgotPasswordToken = await this.generateForgotPasswordLink(user);
 
@@ -267,7 +285,10 @@ export class AuthService {
 
     if (!decoded || decoded?.exp * 1000 < Date.now()) {
       // ||decoded?.exp * 1000 < Date.now()
-      throw new BadRequestException('Invalid token!');
+      throw new RpcException({
+        message: 'Invalid token!',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
     }
     const user = await this.findByEmail(decoded.user.email);
     user.password = await this.hashPassword(password);

@@ -10,3 +10,13 @@ export class CreateProductsResponse {
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
 }
+
+@ObjectType()
+export class AddCommentProductResponse {
+  @Field()
+  message: string;
+
+
+  @Field(() => ErrorType, { nullable: true })
+  error?: ErrorType;
+}

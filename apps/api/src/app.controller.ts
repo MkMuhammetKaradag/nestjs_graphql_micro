@@ -14,7 +14,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Response } from 'express';
 import { catchError, of, switchMap } from 'rxjs';
 import { UserLoginResponse } from './InputTypes/user-object';
-import { ForgotPasswordDto, UserLoginInput } from './InputTypes/user-Input';
+import { ForgotPasswordInput, UserLoginInput } from './InputTypes/user-Input';
 import { ReturnDocument } from 'typeorm';
 import { AuthGuard } from '@app/shared';
 
@@ -81,13 +81,13 @@ export class AppController {
   }
 
   @Post('auth/forgotPassword')
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  async forgotPassword(@Body() forgotPasswordInput: ForgotPasswordInput) {
     return this.authService.send(
       {
         cmd: 'forgot-password',
       },
       {
-        email: forgotPasswordDto.email,
+        email: forgotPasswordInput.email,
       },
     );
   }

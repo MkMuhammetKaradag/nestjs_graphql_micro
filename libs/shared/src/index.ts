@@ -15,15 +15,22 @@ export * from './service/cloudinary.service';
 //Repositories
 export * from './repositories/user.repository';
 export * from './repositories/product.repository';
+export * from './repositories/comment.repository';
+export * from './repositories/like.repository';
 
 // Entities
 export * from './entities/user.entity';
+export * from './entities/product.entity';
+export * from './entities/like.entity';
+export * from './entities/comment.entity';
 
 //interfacs
 export * from './interfaces/user.repository.interface';
 export * from './interfaces/user-request.interface';
 export * from './interfaces/user-jwt.interface';
 export * from './interfaces/user.repository.interface';
+export * from './interfaces/comment.repository.interface';
+export * from './interfaces/like.repository.interface';
 
 // quards
 export * from './guards/auth.guard';

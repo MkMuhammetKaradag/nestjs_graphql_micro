@@ -80,3 +80,16 @@ export class ProductImagesUploadDto {
   @IsNotEmpty({ message: 'id is required.' })
   id: number;
 }
+
+@InputType()
+export class AddCommentProductInput {
+  @Field()
+  @IsInt()
+  @Min(1)
+  @IsNotEmpty({ message: 'id is required.' })
+  productId: number;
+
+  @Field()
+  @IsNotEmpty({ message: 'comment is required.' })
+  comment: string;
+}

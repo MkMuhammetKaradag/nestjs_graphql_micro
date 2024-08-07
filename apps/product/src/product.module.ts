@@ -5,7 +5,11 @@ import { ConfigModule } from '@nestjs/config';
 import {
   CloudinaryModule,
   CloudinaryService,
+  CommentEntity,
+  CommentsRepository,
+  LikeEntity,
   PostgresDBModule,
+  ProductEntity,
   ProductsRepository,
   SharedModule,
   SharedService,
@@ -13,7 +17,6 @@ import {
   UsersRepository,
 } from '@app/shared';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductEntity } from '@app/shared/entities/product.entity';
 
 @Module({
   imports: [
@@ -23,7 +26,12 @@ import { ProductEntity } from '@app/shared/entities/product.entity';
     SharedModule,
     PostgresDBModule,
     CloudinaryModule,
-    TypeOrmModule.forFeature([UserEntity, ProductEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      ProductEntity,
+      CommentEntity,
+      LikeEntity,
+    ]),
   ],
   controllers: [ProductController],
   providers: [
@@ -46,6 +54,10 @@ import { ProductEntity } from '@app/shared/entities/product.entity';
     {
       provide: 'UsersRepositoryInterface',
       useClass: UsersRepository,
+    },
+    {
+      provide: 'CommentsRepositoryInterface',
+      useClass: CommentsRepository,
     },
   ],
 })

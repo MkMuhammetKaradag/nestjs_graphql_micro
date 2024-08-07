@@ -1,5 +1,7 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { ProductEntity } from './product.entity';
+import { CommentEntity } from './comment.entity';
+import { LikeEntity } from './like.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -23,4 +25,16 @@ export class UserEntity {
 
   @OneToMany(() => ProductEntity, (productEntity) => productEntity.vendor)
   products: ProductEntity[];
+
+  
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user)
+  comments: CommentEntity[];
+
+  @OneToMany(() => LikeEntity, (like) => like.user)
+  likes: LikeEntity[];
 }

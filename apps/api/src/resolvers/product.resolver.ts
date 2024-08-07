@@ -19,8 +19,12 @@ import {
 
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
-import { CreateProductsResponse } from '../InputTypes/product.object';
 import {
+  AddCommentProductResponse,
+  CreateProductsResponse,
+} from '../InputTypes/product.object';
+import {
+  AddCommentProductInput,
   CreateProductDto,
   GetProductDto,
   GetProductsDto,
@@ -41,6 +45,7 @@ import { Readable } from 'stream';
 import { REQUEST } from '@nestjs/core';
 import { Product } from '../entities/product.entity';
 import { firstValueFrom } from 'rxjs';
+import { GraphQLError } from 'graphql';
 
 const PRODUCT_CREATED_EVENT = 'productCreated';
 
@@ -201,5 +206,38 @@ export class ProductResolver {
     const { createReadStream } = await image;
     const base64String = await this.convertStreamToBase64(createReadStream());
     return base64String;
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  @Mutation(() => AddCommentProductResponse)
+  async addCommentProduct(
+    @Args('addCommentProductInput')
+    addCommentProductInput: AddCommentProductInput,
+    @Context() context,
+  ) {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+
+    try {
+      const data = await firstValueFrom<AddCommentProductResponse>(
+        this.productService.send(
+          {
+            cmd: 'add-comment-product',
+          },
+          {
+            ...addCommentProductInput,
+            userId: req.user.id,
+          },
+        ),
+      );
+      return data;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
   }
 }

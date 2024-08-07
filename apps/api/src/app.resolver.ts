@@ -21,8 +21,8 @@ import {
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import {
   ActivationInput,
-  ForgotPasswordDto,
-  ResetPasswordDto,
+  ForgotPasswordInput,
+  ResetPasswordInput,
   UserLoginInput,
   UserRegisterInput,
 } from './InputTypes/user-Input';
@@ -239,7 +239,7 @@ export class AppResolver {
 
   @Mutation(() => ForgotPasswordResponse)
   async forgotPassword(
-    @Args('forgotPasswordInput') forgotPasswordDto: ForgotPasswordDto,
+    @Args('forgotPasswordInput') forgotPasswordDto: ForgotPasswordInput,
   ) {
     return this.authService.send(
       {
@@ -253,7 +253,7 @@ export class AppResolver {
 
   @Mutation(() => ResetPasswordResponse)
   async resetPassword(
-    @Args('resetPasswordInput') resetPasswordDto: ResetPasswordDto,
+    @Args('resetPasswordInput') resetPasswordDto: ResetPasswordInput,
   ) {
     return this.authService.send(
       {

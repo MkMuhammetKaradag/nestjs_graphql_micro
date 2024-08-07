@@ -3,8 +3,11 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
+  CommentEntity,
   EmailModule,
+  LikeEntity,
   PostgresDBModule,
+  ProductEntity,
   SharedModule,
   SharedService,
   UserEntity,
@@ -14,7 +17,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt-strategy';
 import { JwtGuard } from './jwt.guard';
-import { ProductEntity } from '@app/shared/entities/product.entity';
 
 @Module({
   imports: [
@@ -32,7 +34,7 @@ import { ProductEntity } from '@app/shared/entities/product.entity';
     SharedModule,
     PostgresDBModule,
     EmailModule,
-    TypeOrmModule.forFeature([UserEntity, ProductEntity]),
+    TypeOrmModule.forFeature([UserEntity, ProductEntity, CommentEntity, LikeEntity]),
   ],
   controllers: [AuthController],
   providers: [

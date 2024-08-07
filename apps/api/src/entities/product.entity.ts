@@ -1,5 +1,6 @@
 import { ObjectType, Field, Directive } from '@nestjs/graphql';
 import { User } from './user.entity';
+import { Comment } from './comment.entity';
 @ObjectType()
 export class Product {
   @Field()
@@ -22,4 +23,7 @@ export class Product {
 
   @Field((type) => User, { nullable: true })
   vendor?: User;
+
+  @Field((type) => [Comment], { nullable: true })
+  comments?: Comment[];
 }

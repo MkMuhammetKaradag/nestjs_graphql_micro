@@ -2,6 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Comment {
+  id: Float!
+  text: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  user: User
+  product: Product
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Product {
   id: Float!
   description: String!
@@ -10,6 +24,7 @@ type Product {
   images: [String!]
   name: String!
   vendor: User
+  comments: [Comment!]
 }
 
 type User {
@@ -74,6 +89,11 @@ type CreateProductsResponse {
   error: ErrorType
 }
 
+type AddCommentProductResponse {
+  message: String!
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -99,10 +119,11 @@ type Mutation {
   activateUser(activationInput: ActivationInput!): ActivationResponse!
   login(loginInput: UserLoginInput!): UserLoginResponse!
   logout: String!
-  forgotPassword(forgotPasswordInput: ForgotPasswordDto!): ForgotPasswordResponse!
-  resetPassword(resetPasswordInput: ResetPasswordDto!): ResetPasswordResponse!
+  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): ResetPasswordResponse!
   createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!
   productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload]): UploadImagesResponse!
+  addCommentProduct(addCommentProductInput: AddCommentProductInput!): AddCommentProductResponse!
 }
 
 input UserRegisterInput {
@@ -123,11 +144,11 @@ input UserLoginInput {
   password: String!
 }
 
-input ForgotPasswordDto {
+input ForgotPasswordInput {
   email: String!
 }
 
-input ResetPasswordDto {
+input ResetPasswordInput {
   password: String!
   activationToken: String!
 }
@@ -145,6 +166,11 @@ input ProductImagesUploadDto {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
+
+input AddCommentProductInput {
+  productId: Float!
+  comment: String!
+}
 
 type Subscription {
   userAdded: User!
