@@ -96,6 +96,12 @@ type AddCommentProductResponse {
   error: ErrorType
 }
 
+type GetCommentsResponse {
+  comments: [Comment!]
+  total: Float
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -104,6 +110,7 @@ type Query {
   getProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
   getMyProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
   getProduct(getProductDto: GetProductDto!): GetProductResponse!
+  getComments(getCommentsInput: GetCommentsInput!): GetCommentsResponse!
 }
 
 input GetProductsDto {
@@ -114,6 +121,12 @@ input GetProductsDto {
 
 input GetProductDto {
   id: Float!
+}
+
+input GetCommentsInput {
+  productId: Float!
+  take: Float = 10
+  skip: Float = 0
 }
 
 type Mutation {

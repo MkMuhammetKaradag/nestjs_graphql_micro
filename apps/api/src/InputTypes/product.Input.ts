@@ -93,3 +93,27 @@ export class AddCommentProductInput {
   @IsNotEmpty({ message: 'comment is required.' })
   comment: string;
 }
+
+@InputType()
+export class GetCommentsInput {
+  // @Field({ nullable: true })
+  // @MaxLength(200, {
+  //   message: 'keyword is too long',
+  // })
+  // keyword: string;
+  @Field()
+  @IsInt()
+  @Min(1)
+  @IsNotEmpty({ message: 'id is required.' })
+  productId: number;
+
+  @Field({ nullable: true, defaultValue: 10 })
+  @IsInt()
+  @Min(0)
+  take?: number;
+
+  @Field({ nullable: true, defaultValue: 0 })
+  @IsInt()
+  @Min(0)
+  skip?: number;
+}

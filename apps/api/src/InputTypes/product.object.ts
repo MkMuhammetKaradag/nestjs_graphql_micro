@@ -20,3 +20,13 @@ export class AddCommentProductResponse {
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
 }
+
+@ObjectType()
+export class GetCommentsResponse {
+  @Field(() => [Comment], { nullable: true })
+  comments: Comment[];
+  @Field({ nullable: true })
+  total: number;
+  @Field(() => ErrorType, { nullable: true })
+  error?: ErrorType;
+}

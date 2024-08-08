@@ -12,6 +12,7 @@ import { GetProductsDTO } from './dtos/get-products.dto';
 import { UploadProductImagesDTO } from './dtos/upload-product-images.dto';
 import { GetMyProductsDTO } from './dtos/get-myProducts.dto';
 import { AddCommentProductInput } from './dtos/add-commentProduct.dto';
+import { GetCommentsDTO } from './dtos/get-comments.dto';
 
 @Controller()
 export class ProductController {
@@ -92,5 +93,14 @@ export class ProductController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return await this.productService.getCommentsProduct(productId);
+  }
+
+  @MessagePattern({ cmd: 'get-comments' })
+  async getComments(
+    @Ctx() context: RmqContext,
+    @Payload() getComments: GetCommentsDTO,
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.productService.getComments(getComments);
   }
 }

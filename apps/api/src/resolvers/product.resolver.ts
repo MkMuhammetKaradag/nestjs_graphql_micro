@@ -22,10 +22,12 @@ import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
 import {
   AddCommentProductResponse,
   CreateProductsResponse,
+  GetCommentsResponse,
 } from '../InputTypes/product.object';
 import {
   AddCommentProductInput,
   CreateProductDto,
+  GetCommentsInput,
   GetProductDto,
   GetProductsDto,
   ProductImagesUploadDto,
@@ -263,5 +265,27 @@ export class ProductResolver {
   @Roles('user')
   createCommentProduct(@Args('productId') productId: number) {
     return this.pubSub.asyncIterator(CREATE_COMMENT_PRODUCT_EVENT);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  @Query(() => GetCommentsResponse)
+  async getComments(
+    @Args('getCommentsInput') getCommentsInput: GetCommentsInput,
+    @Context() context,
+  ) {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+    return this.productService.send(
+      {
+        cmd: 'get-comments',
+      },
+      {
+        ...getCommentsInput,
+        // userId: req.user.id,
+      },
+    );
   }
 }

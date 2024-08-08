@@ -18,6 +18,7 @@ import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { GetMyProductsDTO } from './dtos/get-myProducts.dto';
 import { AddCommentProductInput } from './dtos/add-commentProduct.dto';
 import { RpcException } from '@nestjs/microservices';
+import { GetCommentsDTO } from './dtos/get-comments.dto';
 @Injectable()
 export class ProductService {
   constructor(
@@ -159,5 +160,22 @@ export class ProductService {
     //   relations: ['vendor', 'comments', 'comments.user'],
     // });
     return { comments: ['mami tarafından çekildi'] };
+  }
+
+  async getComments(getComments: GetCommentsDTO) {
+    const take = getComments.take || 10;
+    const skip = getComments.skip || 0;
+
+    const [comments, total] = await this.commentRepository.pagination({
+      where: {
+        product: { id: getComments.productId },
+      },
+      relations: ['product', 'user'],
+      order: { createdAt: 'DESC' },
+      take: take,
+      skip: skip,
+    });
+
+    return { comments, total };
   }
 }
