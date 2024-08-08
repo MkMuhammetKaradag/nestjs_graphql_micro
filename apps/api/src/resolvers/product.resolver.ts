@@ -47,6 +47,7 @@ import { Product } from '../entities/product.entity';
 import { firstValueFrom } from 'rxjs';
 import { GraphQLError } from 'graphql';
 import { Comment } from '../entities/comment.entity';
+import { AppService } from '../app.service';
 
 const PRODUCT_CREATED_EVENT = 'productCreated';
 const CREATE_COMMENT_PRODUCT_EVENT = 'createCommentProduct';
@@ -62,7 +63,7 @@ export class ProductResolver {
 
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
 
-    private cloudinary: CloudinaryService,
+    private readonly appService: AppService,
   ) {}
 
   // @Subscription(() => GetProductResponse)
@@ -179,11 +180,11 @@ export class ProductResolver {
           if (!allowedTypes.includes(mimetype)) {
             return null;
           }
-          return await this.handleImageUpload(image);
+          return await this.appService.handleImageUpload(image);
         }),
       )
     ).filter((item) => item !== null);
-    console.log(imageBase64Strings.length);
+    // console.log(imageBase64Strings.length);
     return this.productService.send(
       {
         cmd: 'upload-product-images',
@@ -195,20 +196,20 @@ export class ProductResolver {
       },
     );
   }
-  async convertStreamToBase64(stream: Readable): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-      stream.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
-      stream.on('error', reject);
-    });
-  }
+  // async convertStreamToBase64(stream: Readable): Promise<string> {
+  //   return new Promise((resolve, reject) => {
+  //     const chunks: Buffer[] = [];
+  //     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+  //     stream.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
+  //     stream.on('error', reject);
+  //   });
+  // }
 
-  async handleImageUpload(image: GraphQLUpload) {
-    const { createReadStream } = await image;
-    const base64String = await this.convertStreamToBase64(createReadStream());
-    return base64String;
-  }
+  // async handleImageUpload(image: GraphQLUpload) {
+  //   const { createReadStream } = await image;
+  //   const base64String = await this.convertStreamToBase64(createReadStream());
+  //   return base64String;
+  // }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('user')

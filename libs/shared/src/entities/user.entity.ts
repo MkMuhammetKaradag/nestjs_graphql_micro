@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ProductEntity } from './product.entity';
 import { CommentEntity } from './comment.entity';
 import { LikeEntity } from './like.entity';
@@ -20,17 +26,21 @@ export class UserEntity {
   @Column({ unique: true })
   email: string;
 
+  @Column({ nullable: true })
+  profilPhoto: string;
+
   @Column({ select: false })
   password: string;
 
   @OneToMany(() => ProductEntity, (productEntity) => productEntity.vendor)
   products: ProductEntity[];
 
-  
-  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
   updatedAt: Date;
-
-
 
   @OneToMany(() => CommentEntity, (comment) => comment.user)
   comments: CommentEntity[];

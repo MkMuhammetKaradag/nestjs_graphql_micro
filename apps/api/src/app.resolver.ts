@@ -40,15 +40,17 @@ import {
   GetProductsResponse,
   RegisterResponse,
   ResetPasswordResponse,
+  UploadProfilePhotoResponse,
   UserLoginResponse,
 } from './InputTypes/user-object';
 import { Request, Response } from 'express';
 import { catchError, firstValueFrom, of, switchMap, throwError } from 'rxjs';
 import { UserInterceptor } from '@app/shared/interceptors/user.interceptor';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloError, ApolloServer } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
-
+import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { AppService } from './app.service';
 const USER_ADDED_EVENT = 'userAdded';
 @Resolver('app')
 export class AppResolver {
@@ -59,6 +61,8 @@ export class AppResolver {
     private readonly productService: ClientProxy,
 
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
+
+    private readonly appService: AppService,
   ) {}
 
   @Subscription(() => User)
@@ -264,6 +268,40 @@ export class AppResolver {
       },
     );
   }
+  @Mutation(() => UploadProfilePhotoResponse)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async profilPhotoUpload(
+    @Args({
+      name: 'image',
+      type: () => GraphQLUpload,
+    })
+    image: GraphQLUpload,
+    @Context() context,
+  ) {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new ApolloError('user is required', 'USER_REQUIRED');
+    }
+    if (!image) throw new ApolloError('Image is required', 'IMAGE_REQUIRED');
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    const { mimetype } = await image;
 
+    let imageBase64String = null;
+
+    if (allowedTypes.includes(mimetype)) {
+      imageBase64String = await this.appService.handleImageUpload(image);
+    }
+    // console.log(imageBase64Strings.length);
+    return this.authService.send(
+      {
+        cmd: 'upload-profilePhoto',
+      },
+      {
+        image: imageBase64String,
+        userId: req.user.id,
+      },
+    );
+  }
   // Auth End
 }

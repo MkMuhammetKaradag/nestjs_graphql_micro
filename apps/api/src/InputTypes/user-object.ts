@@ -82,3 +82,13 @@ export class UploadImagesResponse {
   @Field(() => ErrorType, { nullable: true })
   error?: ErrorType;
 }
+
+
+@ObjectType()
+export class UploadProfilePhotoResponse {
+  @Field({ nullable: true })
+  profilPhoto?: string;
+
+  @Field(() => ErrorType, { nullable: true })
+  error?: ErrorType;
+}

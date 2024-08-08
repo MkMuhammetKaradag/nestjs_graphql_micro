@@ -142,4 +142,15 @@ export class AuthController {
 
     return this.authService.resetPassword(payload);
   }
+
+  @MessagePattern({
+    cmd: 'upload-profilePhoto',
+  })
+  async uploadProductImages(
+    @Ctx() context: RmqContext,
+    @Payload() uploadProfilePhoto: { image: string; userId: number },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.authService.uploadProfilePhoto(uploadProfilePhoto);
+  }
 }

@@ -28,6 +28,7 @@ type User {
   lastName: String!
   email: String!
   password: String!
+  profilPhoto: String
   roles: [String!]
   products: [Product!]
   comments: [Comment!]
@@ -80,6 +81,11 @@ type UploadImagesResponse {
   error: ErrorType
 }
 
+type UploadProfilePhotoResponse {
+  profilPhoto: String
+  error: ErrorType
+}
+
 type CreateProductsResponse {
   product: Product
   error: ErrorType
@@ -117,6 +123,7 @@ type Mutation {
   logout: String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): ResetPasswordResponse!
+  profilPhotoUpload(image: Upload!): UploadProfilePhotoResponse!
   createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!
   productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload]): UploadImagesResponse!
   addCommentProduct(addCommentProductInput: AddCommentProductInput!): AddCommentProductResponse!
@@ -149,6 +156,9 @@ input ResetPasswordInput {
   activationToken: String!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
 input CreateProductDto {
   description: String!
   price: Float!
@@ -159,9 +169,6 @@ input CreateProductDto {
 input ProductImagesUploadDto {
   id: Float!
 }
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload
 
 input AddCommentProductInput {
   productId: Float!

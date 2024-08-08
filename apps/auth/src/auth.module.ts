@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
+  CloudinaryModule,
   CommentEntity,
   EmailModule,
   LikeEntity,
@@ -34,7 +35,13 @@ import { JwtGuard } from './jwt.guard';
     SharedModule,
     PostgresDBModule,
     EmailModule,
-    TypeOrmModule.forFeature([UserEntity, ProductEntity, CommentEntity, LikeEntity]),
+    CloudinaryModule,
+    TypeOrmModule.forFeature([
+      UserEntity,
+      ProductEntity,
+      CommentEntity,
+      LikeEntity,
+    ]),
   ],
   controllers: [AuthController],
   providers: [

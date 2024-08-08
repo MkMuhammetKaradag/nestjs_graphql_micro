@@ -15,6 +15,9 @@ export class User {
   @Field()
   password: string;
 
+  @Field({ nullable: true })
+  profilPhoto?: string;
+
   @Field((type) => [String], { nullable: true })
   roles?: string[];
 

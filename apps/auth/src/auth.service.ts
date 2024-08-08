@@ -1,4 +1,5 @@
 import {
+  CloudinaryService,
   EmailService,
   UserEntity,
   UserJwt,
@@ -37,6 +38,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
+    private cloudinary: CloudinaryService,
   ) {}
   getHello(): string {
     return 'Hello World! auth';
@@ -301,5 +303,27 @@ export class AuthService {
     // // });
 
     return { user };
+  }
+  async storeImageAndGetUrl(file: string) {
+    return (await this.cloudinary.uploadImage(file)).url;
+  }
+  async uploadProfilePhoto(uploadProfilePhoto: {
+    image: string;
+    userId: number;
+  }) {
+    const { image, userId } = uploadProfilePhoto;
+
+    const user = await this.userRepository.findOneById(userId);
+    if (!user) {
+      throw new RpcException({
+        message: 'user  not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    const imageUrls = await this.storeImageAndGetUrl(image);
+    user.profilPhoto = imageUrls;
+    await this.userRepository.save(user);
+    return { profilPhoto: imageUrls };
   }
 }
