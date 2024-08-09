@@ -137,7 +137,7 @@ type Mutation {
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): ResetPasswordResponse!
   profilPhotoUpload(image: Upload!): UploadProfilePhotoResponse!
-  createProduct(createProductDto: CreateProductDto!): CreateProductsResponse!
+  createProduct(createProductInput: CreateProductInput!): CreateProductsResponse!
   productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload]): UploadImagesResponse!
   addCommentProduct(addCommentProductInput: AddCommentProductInput!): AddCommentProductResponse!
 }
@@ -172,7 +172,7 @@ input ResetPasswordInput {
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
-input CreateProductDto {
+input CreateProductInput {
   description: String!
   price: Float!
   quantity: Float!

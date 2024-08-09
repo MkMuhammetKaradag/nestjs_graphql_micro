@@ -26,7 +26,7 @@ import {
 } from '../InputTypes/product.object';
 import {
   AddCommentProductInput,
-  CreateProductDto,
+  CreateProductInput,
   GetCommentsInput,
   GetProductDto,
   GetProductsDto,
@@ -126,7 +126,7 @@ export class ProductResolver {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
   async createProduct(
-    @Args('createProductDto') createProduct: CreateProductDto,
+    @Args('createProductInput') createProduct: CreateProductInput,
     @Context() context,
   ) {
     const { req, res } = context;

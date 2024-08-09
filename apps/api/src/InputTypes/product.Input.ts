@@ -12,7 +12,7 @@ import {
 // import { IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 @InputType()
-export class CreateProductDto {
+export class CreateProductInput {
   @Field()
   @IsNotEmpty({ message: 'description is required.' })
   @MaxLength(200, {
