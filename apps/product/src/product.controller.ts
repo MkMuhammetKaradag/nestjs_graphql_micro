@@ -103,4 +103,52 @@ export class ProductController {
     this.sharedService.acknowledgeMessage(context);
     return this.productService.getComments(getComments);
   }
+
+  @MessagePattern({
+    cmd: 'get-shoppingCart',
+  })
+  async GetShoppingCartInput(
+    @Ctx() context: RmqContext,
+    @Payload()
+    getShoppingCart: {
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.getShoppingCart(getShoppingCart.userId);
+  }
+
+  @MessagePattern({
+    cmd: 'add-shoppingCart-product',
+  })
+  async AddShoppingCartProduct(
+    @Ctx() context: RmqContext,
+    @Payload()
+    addShoppingCartProduct: {
+      productId: number;
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.addShoppingCartProduct(
+      addShoppingCartProduct,
+    );
+  }
+
+  @MessagePattern({
+    cmd: 'remove-shoppingCart-product',
+  })
+  async removeShoppingCartItemProduct(
+    @Ctx() context: RmqContext,
+    @Payload()
+    removeShoppingCartProduct: {
+      productId: number;
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.removeShoppingCartItemProduct(
+      removeShoppingCartProduct,
+    );
+  }
 }

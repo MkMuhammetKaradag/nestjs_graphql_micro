@@ -17,6 +17,7 @@ import { AppResolver } from './app.resolver';
 import * as cookieParser from 'cookie-parser';
 import { ProductResolver } from './resolvers/product.resolver';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ShoppingCartResolver } from './resolvers/shoppingCart.resolver';
 
 @Module({
   imports: [
@@ -53,7 +54,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
         subscriptions: {
           'subscriptions-transport-ws': {
             onConnect: (connectionParams, webSocket, context) => {
-             
               const cookies = connectionParams.cookies
                 ? cookieParser.JSONCookies(connectionParams.cookies)
                 : {};
@@ -78,6 +78,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     PubSubModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppResolver, ProductResolver],
+  providers: [AppService, AppResolver, ProductResolver, ShoppingCartResolver],
 })
 export class AppModule {}

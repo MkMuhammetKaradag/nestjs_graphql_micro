@@ -13,6 +13,9 @@ import {
   ProductsRepository,
   SharedModule,
   SharedService,
+  ShoppingCartEntity,
+  ShoppingCartItemEntity,
+  ShoppingCartsRepository,
   UserEntity,
   UsersRepository,
 } from '@app/shared';
@@ -31,6 +34,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       ProductEntity,
       CommentEntity,
       LikeEntity,
+      ShoppingCartEntity,
+      ShoppingCartItemEntity,
     ]),
   ],
   controllers: [ProductController],
@@ -58,6 +63,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     {
       provide: 'CommentsRepositoryInterface',
       useClass: CommentsRepository,
+    },
+    {
+      provide: 'ShoppingCartsRepositoryInterface',
+      useClass: ShoppingCartsRepository,
     },
   ],
 })

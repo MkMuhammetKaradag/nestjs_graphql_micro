@@ -1,5 +1,6 @@
 import { ProductRepositoryInterface } from '@app/shared/interfaces/product-repository.interface';
 import {
+  BadRequestException,
   HttpStatus,
   Inject,
   Injectable,
@@ -10,6 +11,9 @@ import { CreateProductDTO } from './dtos/create-product.dto';
 import {
   CloudinaryService,
   CommentRepositoryInterface,
+  ShoppingCartEntity,
+  ShoppingCartItemEntity,
+  ShoppingCartRepositoryInterface,
   UserRepositoryInterface,
 } from '@app/shared';
 import { Like } from 'typeorm';
@@ -19,6 +23,7 @@ import { GetMyProductsDTO } from './dtos/get-myProducts.dto';
 import { AddCommentProductInput } from './dtos/add-commentProduct.dto';
 import { RpcException } from '@nestjs/microservices';
 import { GetCommentsDTO } from './dtos/get-comments.dto';
+import { plainToClass } from 'class-transformer';
 @Injectable()
 export class ProductService {
   constructor(
@@ -29,6 +34,9 @@ export class ProductService {
     private readonly commentRepository: CommentRepositoryInterface,
     @Inject('UsersRepositoryInterface')
     private readonly userRepository: UserRepositoryInterface,
+
+    @Inject('ShoppingCartsRepositoryInterface')
+    private readonly shoppingCartRepository: ShoppingCartRepositoryInterface,
     private cloudinary: CloudinaryService,
   ) {}
 
@@ -177,5 +185,172 @@ export class ProductService {
     });
 
     return { comments, total };
+  }
+
+  async getShoppingCart(userId: number) {
+    const userWithCart = await this.userRepository.findByCondition({
+      where: { id: userId },
+      relations: [
+        'shoppingCart',
+        'shoppingCart.items',
+        'shoppingCart.items.product',
+      ],
+    });
+
+    return {
+      shoppingCart: userWithCart.shoppingCart,
+    };
+  }
+
+  async addShoppingCartProduct(addShoppingCartProduct: {
+    productId: number;
+    userId: number;
+  }) {
+    const { userId, productId } = addShoppingCartProduct;
+    const userWithCart = await this.userRepository.findByCondition({
+      where: { id: userId },
+      relations: [
+        'shoppingCart',
+        'shoppingCart.items',
+        'shoppingCart.items.product',
+      ],
+    });
+    // Eğer kullanıcının sepeti yoksa, yeni bir sepet oluşturun
+    if (!userWithCart.shoppingCart) {
+      const newCart = new ShoppingCartEntity();
+      newCart.user = userWithCart;
+      userWithCart.shoppingCart =
+        await this.shoppingCartRepository.save(newCart);
+    }
+    if (!userWithCart.shoppingCart.items) {
+      userWithCart.shoppingCart.items = [];
+    }
+    const product = await this.productRepository.findOneById(productId);
+
+    // Sepette bu ürünün olup olmadığını kontrol et
+    const existingItem = userWithCart.shoppingCart.items.find(
+      (item) => item.product.id === productId,
+    );
+
+    if (existingItem) {
+      // Ürün zaten sepetin içindeyse, miktarını artır
+      existingItem.quantity += 1;
+    } else {
+      // Ürün sepette yoksa, yeni bir item ekle
+      const newItem = new ShoppingCartItemEntity();
+      newItem.product = product;
+      newItem.cart = userWithCart.shoppingCart;
+      newItem.quantity = 1;
+      userWithCart.shoppingCart.items.push(newItem);
+    }
+
+    // function replacer(key: string, value: any) {
+    //   const seen = new WeakSet();
+    //   return function (key: string, value: any) {
+    //     if (typeof value === 'object' && value !== null) {
+    //       if (seen.has(value)) {
+    //         return; // Döngüsel referansı atla
+    //       }
+    //       seen.add(value);
+    //     }
+    //     return value;
+    //   };
+    // }
+    await this.shoppingCartRepository.save(userWithCart.shoppingCart);
+    // const jsonString = JSON.stringify(myShoppingCart, replacer('key', 'value'));
+    // console.log(jsonString);
+    return {
+      product: product,
+    };
+  }
+
+  async removeShoppingCartItemProduct(removeShoppingCartProduct: {
+    productId: number;
+    userId: number;
+  }) {
+    const { userId, productId } = removeShoppingCartProduct;
+    // Kullanıcının sepetini ve ürünleri ilişkilendirilmiş olarak yükleyin
+    let userWithCart = await this.userRepository.findByCondition({
+      where: { id: userId },
+      relations: [
+        'shoppingCart',
+        'shoppingCart.items',
+        'shoppingCart.items.product',
+      ],
+    });
+
+    // Eğer kullanıcının sepeti yoksa, işlem yapmaya gerek yok
+    if (!userWithCart.shoppingCart) {
+      throw new Error('Sepet bulunamadı');
+    }
+
+    // Sepetteki ürünlerin listesini kontrol et
+    const cartItems = userWithCart.shoppingCart.items;
+
+    // Ürün bulunup bulunmadığını kontrol et
+    const existingItem = cartItems.find(
+      (item) => item.product.id === productId,
+    );
+
+    if (existingItem) {
+      // Ürün sepette bulunuyor, miktarını azalt
+      if (existingItem.quantity > 1) {
+        existingItem.quantity -= 1;
+      } else {
+        // Miktar 1 ise, ürünü sepetten tamamen kaldır
+        userWithCart.shoppingCart.items = cartItems.filter(
+          (item) => item.product.id !== productId,
+        );
+      }
+
+      // Sepeti güncelle
+      await this.shoppingCartRepository.save(userWithCart.shoppingCart);
+
+      return {
+        shoppingCart: userWithCart.shoppingCart,
+      };
+    } else {
+      throw new Error('Ürün sepet içinde bulunamadı');
+    }
+  }
+
+  async removeShoppingCartItem(removeShoppingCartProduct: {
+    productId: number;
+    userId: number;
+  }) {
+    const { userId, productId } = removeShoppingCartProduct;
+    // Kullanıcının sepetini ve ürünleri ilişkilendirilmiş olarak yükleyin
+    let userWithCart = await this.userRepository.findByCondition({
+      where: { id: userId },
+      relations: [
+        'shoppingCart',
+        'shoppingCart.items',
+        'shoppingCart.items.product',
+      ],
+    });
+
+    // Eğer kullanıcının sepeti yoksa, işlem yapmaya gerek yok
+    if (!userWithCart.shoppingCart) {
+      throw new Error('Sepet bulunamadı');
+    }
+
+    // Sepetteki ürünlerin listesini kontrol et
+    const cartItems = userWithCart.shoppingCart.items;
+
+    // Ürün bulunup bulunmadığını kontrol et
+    const updatedItems = cartItems.filter(
+      (item) => item.product.id !== productId,
+    );
+
+    if (cartItems.length === updatedItems.length) {
+      // Eğer ürün sepet içinde bulunamadıysa
+      throw new Error('Ürün sepet içinde bulunamadı');
+    }
+
+    // Ürünü sepetten kaldır
+    userWithCart.shoppingCart.items = updatedItems;
+
+    // Sepeti güncelle
+    await this.shoppingCartRepository.save(userWithCart.shoppingCart);
   }
 }

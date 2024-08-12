@@ -11,6 +11,8 @@ import {
   ProductEntity,
   SharedModule,
   SharedService,
+  ShoppingCartEntity,
+  ShoppingCartItemEntity,
   UserEntity,
   UsersRepository,
 } from '@app/shared';
@@ -41,6 +43,8 @@ import { JwtGuard } from './jwt.guard';
       ProductEntity,
       CommentEntity,
       LikeEntity,
+      ShoppingCartEntity,
+      ShoppingCartItemEntity,
     ]),
   ],
   controllers: [AuthController],

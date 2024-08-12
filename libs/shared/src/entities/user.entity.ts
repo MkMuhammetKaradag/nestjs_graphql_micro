@@ -1,13 +1,17 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductEntity } from './product.entity';
 import { CommentEntity } from './comment.entity';
 import { LikeEntity } from './like.entity';
+import { ShoppingCartEntity } from './shoppingCart.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class UserEntity {
@@ -34,6 +38,12 @@ export class UserEntity {
 
   @OneToMany(() => ProductEntity, (productEntity) => productEntity.vendor)
   products: ProductEntity[];
+
+  @OneToOne(() => ShoppingCartEntity, (shoppingCart) => shoppingCart.user, {
+    cascade: true,
+  })
+  @Exclude()
+  shoppingCart: ShoppingCartEntity;
 
   @UpdateDateColumn({
     type: 'timestamp',

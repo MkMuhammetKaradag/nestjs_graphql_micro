@@ -102,6 +102,28 @@ type GetCommentsResponse {
   error: ErrorType
 }
 
+type ShoppingCartItem {
+  id: Float!
+  product: Product
+  quantity: Float!
+}
+
+type ShoppingCart {
+  id: Float!
+  items: [ShoppingCartItem!]
+  user: User
+}
+
+type GetSoppingCartResponse {
+  shoppingCart: ShoppingCart
+  error: ErrorType
+}
+
+type AddSoppingCartResponse {
+  product: Product
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -111,6 +133,7 @@ type Query {
   getMyProducts(getProductsDto: GetProductsDto!): GetProductsResponse!
   getProduct(getProductDto: GetProductDto!): GetProductResponse!
   getComments(getCommentsInput: GetCommentsInput!): GetCommentsResponse!
+  getMyShoppingCart: GetSoppingCartResponse!
 }
 
 input GetProductsDto {
@@ -140,6 +163,8 @@ type Mutation {
   createProduct(createProductInput: CreateProductInput!): CreateProductsResponse!
   productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload]): UploadImagesResponse!
   addCommentProduct(addCommentProductInput: AddCommentProductInput!): AddCommentProductResponse!
+  addShoppingCartProduct(addShoppingCartProductInput: AddShoppingCartProductInput!): AddSoppingCartResponse!
+  removeShoppingCartItemProduct(removeShoppingCartProductInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
 }
 
 input UserRegisterInput {
@@ -186,6 +211,10 @@ input ProductImagesUploadDto {
 input AddCommentProductInput {
   productId: Float!
   comment: String!
+}
+
+input AddShoppingCartProductInput {
+  productId: Float!
 }
 
 type Subscription {
