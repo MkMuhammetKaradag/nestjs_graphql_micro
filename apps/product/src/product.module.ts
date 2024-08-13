@@ -3,11 +3,13 @@ import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { ConfigModule } from '@nestjs/config';
 import {
+  ChatEntity,
   CloudinaryModule,
   CloudinaryService,
   CommentEntity,
   CommentsRepository,
   LikeEntity,
+  MessageEntity,
   PostgresDBModule,
   ProductEntity,
   ProductsRepository,
@@ -36,6 +38,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       LikeEntity,
       ShoppingCartEntity,
       ShoppingCartItemEntity,
+      ChatEntity,
+      MessageEntity,
     ]),
   ],
   controllers: [ProductController],

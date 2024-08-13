@@ -18,6 +18,7 @@ import * as cookieParser from 'cookie-parser';
 import { ProductResolver } from './resolvers/product.resolver';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ShoppingCartResolver } from './resolvers/shoppingCart.resolver';
+import { ChatResolver } from './resolvers/chat.resolver';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ShoppingCartResolver } from './resolvers/shoppingCart.resolver';
       'PRODUCT_SERVICE',
       process.env.RABBITMQ_PRODUCT_QUEUE,
     ),
+    SharedModule.registerRmq('CHAT_SERVICE', process.env.RABBITMQ_CHAT_QUEUE),
 
     GraphQLModule.forRootAsync({
       imports: [ConfigModule],
@@ -78,6 +80,12 @@ import { ShoppingCartResolver } from './resolvers/shoppingCart.resolver';
     PubSubModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppResolver, ProductResolver, ShoppingCartResolver],
+  providers: [
+    AppService,
+    AppResolver,
+    ProductResolver,
+    ShoppingCartResolver,
+    ChatResolver,
+  ],
 })
 export class AppModule {}

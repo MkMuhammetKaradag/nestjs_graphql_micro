@@ -3,10 +3,12 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
+  ChatEntity,
   CloudinaryModule,
   CommentEntity,
   EmailModule,
   LikeEntity,
+  MessageEntity,
   PostgresDBModule,
   ProductEntity,
   SharedModule,
@@ -45,6 +47,8 @@ import { JwtGuard } from './jwt.guard';
       LikeEntity,
       ShoppingCartEntity,
       ShoppingCartItemEntity,
+      ChatEntity,
+      MessageEntity,
     ]),
   ],
   controllers: [AuthController],

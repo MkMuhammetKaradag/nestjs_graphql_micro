@@ -28,7 +28,7 @@ export class MessageEntity {
   @ManyToOne(() => ChatEntity, (chat) => chat.messages)
   chat: ChatEntity;
 
-  @Field()
+  // @Field()
   @Column({ default: false })
   isRead: boolean;
 

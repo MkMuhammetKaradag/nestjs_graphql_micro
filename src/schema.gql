@@ -2,6 +2,83 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CommentEntity {
+  id: ID!
+  text: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  product: ProductEntity!
+  user: UserEntity!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type LikeEntity {
+  id: ID!
+  product: ProductEntity!
+  user: UserEntity!
+}
+
+type ProductEntity {
+  id: ID!
+  description: String!
+  price: Float!
+  quantity: Float!
+  images: [String!]!
+  name: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  vendor: UserEntity!
+  comments: [CommentEntity!]!
+  likes: [LikeEntity!]!
+}
+
+type ShoppingCartItemEntity {
+  id: ID!
+  cart: ShoppingCartEntity!
+  product: ProductEntity!
+  quantity: Float!
+}
+
+type ShoppingCartEntity {
+  id: ID!
+  user: UserEntity!
+  items: [ShoppingCartItemEntity!]!
+}
+
+type MessageEntity {
+  id: ID!
+  content: String!
+  sender: UserEntity!
+  chat: ChatEntity!
+  createdAt: DateTime!
+}
+
+type ChatEntity {
+  id: ID!
+  users: [UserEntity!]!
+  messages: [MessageEntity!]
+}
+
+type UserEntity {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  roles: [String!]!
+  email: String!
+  profilPhoto: String!
+  password: String!
+  products: [ProductEntity!]!
+  shoppingCart: ShoppingCartEntity!
+  updatedAt: DateTime!
+  comments: [CommentEntity!]!
+  likes: [LikeEntity!]!
+  chats: [ChatEntity!]!
+}
+
 type Comment {
   id: Float!
   text: String!
@@ -166,6 +243,7 @@ type Mutation {
   addShoppingCartProduct(addShoppingCartProductInput: AddShoppingCartProductInput!): AddSoppingCartResponse!
   removeShoppingCartItemProduct(removeShoppingCartProductInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
   removeShoppingCartItem(removeShoppingCartItemInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
+  createChat(userIds: [Float!]!): ChatEntity!
 }
 
 input UserRegisterInput {

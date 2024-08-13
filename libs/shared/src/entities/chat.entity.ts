@@ -20,7 +20,7 @@ export class ChatEntity {
   @JoinTable()
   users: UserEntity[];
 
-  @Field(() => [MessageEntity])
+  @Field(() => [MessageEntity], { nullable: true })
   @OneToMany(() => MessageEntity, (message) => message.chat)
   messages: MessageEntity[];
 }
