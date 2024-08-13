@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import { CommentEntity } from './comment.entity';
 import { LikeEntity } from './like.entity';
 import { ShoppingCartEntity } from './shoppingCart.entity';
 import { Exclude } from 'class-transformer';
+import { ChatEntity } from './chat.entity';
 
 @Entity('user')
 export class UserEntity {
@@ -57,4 +59,8 @@ export class UserEntity {
 
   @OneToMany(() => LikeEntity, (like) => like.user)
   likes: LikeEntity[];
+
+  // @Field(() => [Chat])
+  @ManyToMany(() => ChatEntity, (chat) => chat.users)
+  chats: ChatEntity[];
 }
