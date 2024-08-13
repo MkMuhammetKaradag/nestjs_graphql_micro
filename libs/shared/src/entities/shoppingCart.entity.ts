@@ -25,8 +25,8 @@ export class ShoppingCartEntity {
   @Exclude()
   items: ShoppingCartItemEntity[];
 
-  toJSON() {
-    const { user, ...rest } = this;
-    return rest;
-  }
+  // toJSON() {
+  //   const { user, ...rest } = this;
+  //   return rest;
+  // }
 }

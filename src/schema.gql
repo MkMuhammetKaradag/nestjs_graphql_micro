@@ -165,6 +165,7 @@ type Mutation {
   addCommentProduct(addCommentProductInput: AddCommentProductInput!): AddCommentProductResponse!
   addShoppingCartProduct(addShoppingCartProductInput: AddShoppingCartProductInput!): AddSoppingCartResponse!
   removeShoppingCartItemProduct(removeShoppingCartProductInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
+  removeShoppingCartItem(removeShoppingCartItemInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
 }
 
 input UserRegisterInput {

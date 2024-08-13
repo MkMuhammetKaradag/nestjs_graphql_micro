@@ -136,7 +136,7 @@ export class ProductController {
   }
 
   @MessagePattern({
-    cmd: 'remove-shoppingCart-product',
+    cmd: 'remove-shoppingCartItem-product',
   })
   async removeShoppingCartItemProduct(
     @Ctx() context: RmqContext,
@@ -149,6 +149,22 @@ export class ProductController {
     this.sharedService.acknowledgeMessage(context);
     return await this.productService.removeShoppingCartItemProduct(
       removeShoppingCartProduct,
+    );
+  }
+  @MessagePattern({
+    cmd: 'remove-shoppingCart-item',
+  })
+  async removeShoppingCartItem(
+    @Ctx() context: RmqContext,
+    @Payload()
+    removeShoppingCartItem: {
+      productId: number;
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.productService.removeShoppingCartItem(
+      removeShoppingCartItem,
     );
   }
 }

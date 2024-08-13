@@ -193,6 +193,7 @@ export class ProductService {
       relations: [
         'shoppingCart',
         'shoppingCart.items',
+        'shoppingCart.user',
         'shoppingCart.items.product',
       ],
     });
@@ -234,8 +235,15 @@ export class ProductService {
 
     if (existingItem) {
       // Ürün zaten sepetin içindeyse, miktarını artır
-      existingItem.quantity += 1;
-    } else {
+      if (product.quantity > existingItem.quantity) {
+        existingItem.quantity += 1;
+      } else {
+        throw new RpcException({
+          message: 'The product is not in stock.',
+          statusCode: HttpStatus.NOT_FOUND,
+        });
+      }
+    } else if (product.quantity >= 1) {
       // Ürün sepette yoksa, yeni bir item ekle
       const newItem = new ShoppingCartItemEntity();
       newItem.product = product;
@@ -244,21 +252,8 @@ export class ProductService {
       userWithCart.shoppingCart.items.push(newItem);
     }
 
-    // function replacer(key: string, value: any) {
-    //   const seen = new WeakSet();
-    //   return function (key: string, value: any) {
-    //     if (typeof value === 'object' && value !== null) {
-    //       if (seen.has(value)) {
-    //         return; // Döngüsel referansı atla
-    //       }
-    //       seen.add(value);
-    //     }
-    //     return value;
-    //   };
-    // }
     await this.shoppingCartRepository.save(userWithCart.shoppingCart);
-    // const jsonString = JSON.stringify(myShoppingCart, replacer('key', 'value'));
-    // console.log(jsonString);
+
     return {
       product: product,
     };
@@ -281,7 +276,10 @@ export class ProductService {
 
     // Eğer kullanıcının sepeti yoksa, işlem yapmaya gerek yok
     if (!userWithCart.shoppingCart) {
-      throw new Error('Sepet bulunamadı');
+      throw new RpcException({
+        message: 'The product is not in Basket.',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
 
     // Sepetteki ürünlerin listesini kontrol et
@@ -310,7 +308,10 @@ export class ProductService {
         shoppingCart: userWithCart.shoppingCart,
       };
     } else {
-      throw new Error('Ürün sepet içinde bulunamadı');
+      throw new RpcException({
+        message: 'The product is not in Basket.',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
   }
 
@@ -331,7 +332,10 @@ export class ProductService {
 
     // Eğer kullanıcının sepeti yoksa, işlem yapmaya gerek yok
     if (!userWithCart.shoppingCart) {
-      throw new Error('Sepet bulunamadı');
+      throw new RpcException({
+        message: 'The product is not in Basket.',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
 
     // Sepetteki ürünlerin listesini kontrol et
@@ -344,7 +348,10 @@ export class ProductService {
 
     if (cartItems.length === updatedItems.length) {
       // Eğer ürün sepet içinde bulunamadıysa
-      throw new Error('Ürün sepet içinde bulunamadı');
+      throw new RpcException({
+        message: 'The product is not in Basket.',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
 
     // Ürünü sepetten kaldır
@@ -352,5 +359,8 @@ export class ProductService {
 
     // Sepeti güncelle
     await this.shoppingCartRepository.save(userWithCart.shoppingCart);
+    return {
+      shoppingCart: userWithCart.shoppingCart,
+    };
   }
 }

@@ -12,6 +12,7 @@ import {
   AddShoppingCartProductInput,
   GetShoppingCartInput,
 } from '../InputTypes/shoppingCart.Input';
+import { GraphQLError } from 'graphql';
 
 Resolver('shoppingCart');
 export class ShoppingCartResolver {
@@ -25,7 +26,7 @@ export class ShoppingCartResolver {
   @Roles('user')
   async getMyShoppingCart(@Context() context) {
     const { req, res } = context;
-    const data = await firstValueFrom(
+    const data = await firstValueFrom<GetSoppingCartResponse>(
       this.productService.send(
         {
           cmd: 'get-shoppingCart',
@@ -51,20 +52,25 @@ export class ShoppingCartResolver {
     if (!req?.user) {
       throw new BadRequestException();
     }
+    try {
+      const data = await firstValueFrom(
+        this.productService.send(
+          {
+            cmd: 'add-shoppingCart-product',
+          },
+          {
+            userId: req.user.id,
+            productId: addShoppingCartProductInput.productId,
+          },
+        ),
+      );
 
-    const data = await firstValueFrom(
-      this.productService.send(
-        {
-          cmd: 'add-shoppingCart-product',
-        },
-        {
-          userId: req.user.id,
-          productId: addShoppingCartProductInput.productId,
-        },
-      ),
-    );
-
-    return data;
+      return data;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
   }
 
   @Mutation(() => GetSoppingCartResponse)
@@ -83,7 +89,7 @@ export class ShoppingCartResolver {
     const data = await firstValueFrom(
       this.productService.send(
         {
-          cmd: 'remove-shoppingCart-product',
+          cmd: 'remove-shoppingCartItem-product',
         },
         {
           userId: req.user.id,
@@ -93,5 +99,39 @@ export class ShoppingCartResolver {
     );
 
     return data;
+  }
+
+  @Mutation(() => GetSoppingCartResponse)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async removeShoppingCartItem(
+    @Args('removeShoppingCartItemInput')
+    removeShoppingCartItemInput: AddShoppingCartProductInput,
+    @Context() context,
+  ) {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+
+    try {
+      const data = await firstValueFrom(
+        this.productService.send(
+          {
+            cmd: 'remove-shoppingCart-item',
+          },
+          {
+            userId: req.user.id,
+            productId: removeShoppingCartItemInput.productId,
+          },
+        ),
+      );
+
+      return data;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
   }
 }
