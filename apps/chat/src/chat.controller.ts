@@ -72,4 +72,19 @@ export class ChatController {
     this.sharedService.acknowledgeMessage(context);
     return this.chatService.markMessageAsRead(markMessageDto);
   }
+
+  @MessagePattern({ cmd: 'get-messages' })
+  async getMessages(
+    @Ctx() context: RmqContext,
+    @Payload()
+    getMessagesDto: {
+      chatId: number;
+      skip: number;
+      take: number;
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.chatService.getMessages(getMessagesDto);
+  }
 }

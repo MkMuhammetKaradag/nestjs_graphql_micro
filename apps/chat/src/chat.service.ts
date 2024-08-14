@@ -34,7 +34,7 @@ export class ChatService {
   async getUserChats(userId: number) {
     return await this.userRepository.findByCondition({
       where: { id: userId },
-      relations: ['chats',"chats.users"], // 'chats' relations field will fetch all chats the user is part of
+      relations: ['chats', 'chats.users'], // 'chats' relations field will fetch all chats the user is part of
     });
   }
 
@@ -137,5 +137,49 @@ export class ChatService {
     await this.messageReadRepository.save(messageRead);
 
     return messageRead;
+  }
+
+  async getMessages(getMessagesDto: {
+    chatId: number;
+    skip: number;
+    take: number;
+    userId: number;
+  }) {
+    const { chatId, skip, take, userId } = getMessagesDto;
+    const chat = await this.chatRepository.findByCondition({
+      where: {
+        id: chatId,
+        users: {
+          id: userId,
+        },
+      },
+    });
+    if (!chat) {
+      throw new RpcException({
+        message: 'Chat not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    const [messages, total] = await this.messageRepository.pagination({
+      where: { chat: { id: chatId } },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        sender: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          profilPhoto: true,
+        },
+      },
+      relations: ['sender'],
+      order: { createdAt: 'DESC' }, // Son mesajlar önce gelsin
+      skip: skip,
+      take: take,
+    });
+
+    return { messages, total };
   }
 }

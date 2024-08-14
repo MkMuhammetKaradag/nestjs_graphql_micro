@@ -210,6 +210,12 @@ type AddSoppingCartResponse {
   error: ErrorType
 }
 
+type GetMessagesResponse {
+  messages: [MessageEntity!]
+  total: Float
+  error: ErrorType
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -221,6 +227,7 @@ type Query {
   getComments(getCommentsInput: GetCommentsInput!): GetCommentsResponse!
   getMyShoppingCart: GetSoppingCartResponse!
   getUserChats: UserEntity!
+  getMessages(getMessageInput: GetMessagesInput!): GetMessagesResponse!
 }
 
 input GetProductsDto {
@@ -237,6 +244,12 @@ input GetCommentsInput {
   productId: Float!
   take: Float = 10
   skip: Float = 0
+}
+
+input GetMessagesInput {
+  chatId: Float!
+  take: Float!
+  skip: Float!
 }
 
 type Mutation {

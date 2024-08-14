@@ -8,7 +8,12 @@ import {
   RolesGuard,
   UserEntity,
 } from '@app/shared';
-import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {
   Args,
   Context,
@@ -22,10 +27,12 @@ import { firstValueFrom } from 'rxjs';
 
 import { GraphQLError } from 'graphql';
 import {
+  GetMessagesInput,
   MarkMessageAsReadInput,
   SendMessageInput,
 } from '../InputTypes/chat.Input';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { GetMessagesResponse } from '../InputTypes/chat.object';
 const MESSAGE_SENT = 'messageSent';
 const MESSAGE_READ = 'messageRead';
 Resolver('shoppingCart');
@@ -218,5 +225,36 @@ export class ChatResolver {
   })
   messageRead(@Args('messageId') messageId: number) {
     return this.pubSub.asyncIterator('messageRead');
+  }
+
+  @Query(() => GetMessagesResponse)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async getMessages(
+    @Args('getMessageInput') getMessageInput: GetMessagesInput,
+    @Context() context,
+  ): Promise<GetMessagesResponse> {
+    const { res, req } = context;
+    if (!req?.user.id) {
+      throw new UnauthorizedException();
+    }
+    try {
+      const data = await firstValueFrom<GetMessagesResponse>(
+        this.chatService.send(
+          {
+            cmd: 'get-messages',
+          },
+          {
+            userId: req.user.id,
+            ...getMessageInput,
+          },
+        ),
+      );
+      return data;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
   }
 }
