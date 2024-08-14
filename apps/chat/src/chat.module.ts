@@ -8,6 +8,8 @@ import {
   CommentEntity,
   LikeEntity,
   MessageEntity,
+  MessageReadEntity,
+  MessageReadsRepository,
   MessagesRepository,
   PostgresDBModule,
   ProductEntity,
@@ -36,6 +38,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       ShoppingCartItemEntity,
       ChatEntity,
       MessageEntity,
+      MessageReadEntity,
     ]),
   ],
   controllers: [ChatController],
@@ -59,6 +62,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     {
       provide: 'MessagesRepositoryInterface',
       useClass: MessagesRepository,
+    },
+
+    {
+      provide: 'MessageReadsRepositoryInterface',
+      useClass: MessageReadsRepository,
     },
   ],
 })

@@ -1,6 +1,8 @@
 import {
   ChatRepositoryInterface,
   ChatsRepository,
+  MessageReadRepositoryInterface,
+  MessageReadsRepository,
   MessageRepositoryInterface,
   UserRepositoryInterface,
 } from '@app/shared';
@@ -21,9 +23,19 @@ export class ChatService {
 
     @Inject('MessagesRepositoryInterface')
     private readonly messageRepository: MessageRepositoryInterface,
+
+    @Inject('MessageReadsRepositoryInterface')
+    private readonly messageReadRepository: MessageReadsRepository,
   ) {}
   getHello(): string {
     return 'Hello World!';
+  }
+
+  async getUserChats(userId: number) {
+    return await this.userRepository.findByCondition({
+      where: { id: userId },
+      relations: ['chats',"chats.users"], // 'chats' relations field will fetch all chats the user is part of
+    });
   }
 
   async createChat(createChatProp: { userIds: number[] }) {
@@ -79,5 +91,51 @@ export class ChatService {
     await this.messageRepository.save(message);
 
     return { message, users: usersId };
+  }
+
+  async markMessageAsRead(markMessageDto: {
+    messageId: number;
+    userId: number;
+  }) {
+    const { messageId, userId } = markMessageDto;
+    const message = await this.messageRepository.findOneById(messageId);
+    if (!message) {
+      throw new RpcException({
+        message: 'Message not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    const user = await this.userRepository.findOneById(userId);
+    if (!user) {
+      throw new RpcException({
+        message: 'User not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+
+    const existingReadRecord = await this.messageReadRepository.findByCondition(
+      {
+        where: {
+          user: { id: userId },
+          message: { id: messageId },
+        },
+      },
+    );
+
+    if (existingReadRecord) {
+      // The user has already marked this message as read
+      throw new RpcException({
+        message: ' The user has already marked this message as read',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const messageRead = this.messageReadRepository.create({
+      message,
+      user: { id: userId },
+    });
+    await this.messageReadRepository.save(messageRead);
+
+    return messageRead;
   }
 }

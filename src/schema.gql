@@ -49,12 +49,18 @@ type ShoppingCartEntity {
   items: [ShoppingCartItemEntity!]!
 }
 
+type MessageReadEntity {
+  id: ID!
+  message: MessageEntity!
+  user: UserEntity!
+}
+
 type MessageEntity {
   id: ID!
   content: String!
   sender: UserEntity!
   chat: ChatEntity!
-  isRead: Boolean!
+  readStatuses: [MessageReadEntity!]!
   createdAt: String!
 }
 
@@ -70,14 +76,16 @@ type UserEntity {
   lastName: String!
   roles: [String!]!
   email: String!
-  profilPhoto: String!
+  profilPhoto: String
   password: String!
+  isOnline: Boolean!
   products: [ProductEntity!]!
   shoppingCart: ShoppingCartEntity!
   updatedAt: DateTime!
   comments: [CommentEntity!]!
   likes: [LikeEntity!]!
   chats: [ChatEntity!]!
+  readMessages: [MessageReadEntity!]!
 }
 
 type Comment {
@@ -212,6 +220,7 @@ type Query {
   getProduct(getProductDto: GetProductDto!): GetProductResponse!
   getComments(getCommentsInput: GetCommentsInput!): GetCommentsResponse!
   getMyShoppingCart: GetSoppingCartResponse!
+  getUserChats: UserEntity!
 }
 
 input GetProductsDto {
@@ -238,6 +247,7 @@ type Mutation {
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): ResetPasswordResponse!
   profilPhotoUpload(image: Upload!): UploadProfilePhotoResponse!
+  setUserOnlineStatus(setUserOnlineStatusInput: SetUserOnlineStatusInput!): UserEntity!
   createProduct(createProductInput: CreateProductInput!): CreateProductsResponse!
   productImagesUpload(productImagesUploadDto: ProductImagesUploadDto!, images: [Upload]): UploadImagesResponse!
   addCommentProduct(addCommentProductInput: AddCommentProductInput!): AddCommentProductResponse!
@@ -246,6 +256,7 @@ type Mutation {
   removeShoppingCartItem(removeShoppingCartItemInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
   createChat(userIds: [Float!]!): ChatEntity!
   sendMessage(sendMessageInput: SendMessageInput!): MessageEntity!
+  markMessageAsRead(markMessageAsReadInput: MarkMessageAsReadInput!): MessageReadEntity!
 }
 
 input UserRegisterInput {
@@ -278,6 +289,10 @@ input ResetPasswordInput {
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
 
+input SetUserOnlineStatusInput {
+  isOnline: Boolean!
+}
+
 input CreateProductInput {
   description: String!
   price: Float!
@@ -303,9 +318,15 @@ input SendMessageInput {
   content: String!
 }
 
+input MarkMessageAsReadInput {
+  messageId: Float!
+}
+
 type Subscription {
   userAdded: User!
+  userStatusChanged(userId: Float!): UserEntity!
   productCreated: Product!
   createCommentProduct(productId: Float!): Comment!
   messageSent(chatId: Float!): MessageEntity!
+  messageRead(messageId: Float!): MessageReadEntity!
 }

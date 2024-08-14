@@ -13,3 +13,14 @@ export class SendMessageInput {
   @IsNotEmpty({ message: 'comment is required.' })
   content: string;
 }
+
+@InputType()
+export class MarkMessageAsReadInput {
+  @Field()
+  @IsInt()
+  @Min(1)
+  @IsNotEmpty({ message: 'id is required.' })
+  messageId: number;
+
+
+}

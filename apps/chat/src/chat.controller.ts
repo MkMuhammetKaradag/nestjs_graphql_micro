@@ -22,6 +22,18 @@ export class ChatController {
     return this.chatService.getHello();
   }
 
+  @MessagePattern({ cmd: 'get-userChats' })
+  async getUserChats(
+    @Ctx() context: RmqContext,
+    @Payload()
+    getUserChats: {
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.chatService.getUserChats(getUserChats.userId);
+  }
+
   @MessagePattern({ cmd: 'create-chat' })
   async getChat(
     @Ctx() context: RmqContext,
@@ -46,5 +58,18 @@ export class ChatController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return this.chatService.sendMessage(sendMessage);
+  }
+
+  @MessagePattern({ cmd: 'mark-message' })
+  async markMessageAsRead(
+    @Ctx() context: RmqContext,
+    @Payload()
+    markMessageDto: {
+      messageId: number;
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.chatService.markMessageAsRead(markMessageDto);
   }
 }

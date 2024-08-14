@@ -2,9 +2,11 @@ import {
   AuthGuard,
   ChatEntity,
   MessageEntity,
+  MessageReadEntity,
   PUB_SUB,
   Roles,
   RolesGuard,
+  UserEntity,
 } from '@app/shared';
 import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
 import {
@@ -19,9 +21,13 @@ import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
 import { GraphQLError } from 'graphql';
-import { SendMessageInput } from '../InputTypes/chat.Input';
+import {
+  MarkMessageAsReadInput,
+  SendMessageInput,
+} from '../InputTypes/chat.Input';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 const MESSAGE_SENT = 'messageSent';
+const MESSAGE_READ = 'messageRead';
 Resolver('shoppingCart');
 export class ChatResolver {
   constructor(
@@ -30,6 +36,33 @@ export class ChatResolver {
 
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
+
+  @Query(() => UserEntity)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async getUserChats(@Context() context): Promise<UserEntity> {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+    try {
+      const user = await firstValueFrom<UserEntity>(
+        this.chatService.send(
+          {
+            cmd: 'get-userChats',
+          },
+          {
+            userId: req.user.id,
+          },
+        ),
+      );
+      return user;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+  }
 
   @Mutation(() => ChatEntity)
   @UseGuards(AuthGuard, RolesGuard)
@@ -121,7 +154,7 @@ export class ChatResolver {
         payload.messageSent.users,
         user.id,
       );
-      // console.log(payload.messageSent);
+
       // Mesajın doğru sohbette olup olmadığını ve kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
       return payload.messageSent.chat.id === chatId && isUserInChat;
     },
@@ -137,9 +170,53 @@ export class ChatResolver {
     // return chat.users.some(user => user.id === userId);
 
     // Örnek return değeri
-    console.log(users);
-    console.log(userId);
-    console.log(userId in users);
     return userId in users; // Kullanıcının bu sohbette olduğunu varsayıyoruz
+  }
+
+  @Mutation(() => MessageReadEntity)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async markMessageAsRead(
+    @Args('markMessageAsReadInput')
+    markMessageAsReadInput: MarkMessageAsReadInput,
+    @Context() context,
+  ): Promise<MessageReadEntity> {
+    const { req, res } = context;
+    if (!req?.user.id) {
+      throw new BadRequestException();
+    }
+    try {
+      const data = await firstValueFrom<MessageReadEntity>(
+        this.chatService.send(
+          {
+            cmd: 'mark-message',
+          },
+          {
+            messageId: markMessageAsReadInput.messageId,
+            userId: req.user.id,
+          },
+        ),
+      );
+      if (data) {
+        this.pubSub.publish(MESSAGE_READ, {
+          messageRead: {
+            ...data,
+          },
+        });
+      }
+      return data;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+  }
+
+  @Subscription(() => MessageReadEntity, {
+    filter: (payload, variables) =>
+      payload.messageRead.message.id === variables.messageId,
+  })
+  messageRead(@Args('messageId') messageId: number) {
+    return this.pubSub.asyncIterator('messageRead');
   }
 }

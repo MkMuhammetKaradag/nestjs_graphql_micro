@@ -5,10 +5,12 @@ import {
   ManyToOne,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { ObjectType, Field, ID, GraphQLISODateTime } from '@nestjs/graphql';
 import { UserEntity } from './user.entity';
 import { ChatEntity } from './chat.entity';
+import { MessageReadEntity } from './messageRead.entity';
 
 @ObjectType()
 @Entity('message')
@@ -29,9 +31,9 @@ export class MessageEntity {
   @ManyToOne(() => ChatEntity, (chat) => chat.messages)
   chat: ChatEntity;
 
-  @Field()
-  @Column({ default: false })
-  isRead: boolean;
+  @Field(() => [MessageReadEntity])
+  @OneToMany(() => MessageReadEntity, (messageRead) => messageRead.message)
+  readStatuses: MessageReadEntity[];
 
   @Field(() => String)
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

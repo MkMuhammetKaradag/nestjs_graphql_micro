@@ -153,4 +153,16 @@ export class AuthController {
     this.sharedService.acknowledgeMessage(context);
     return await this.authService.uploadProfilePhoto(uploadProfilePhoto);
   }
+
+
+  @MessagePattern({
+    cmd: 'set-userOnline-status',
+  })
+  async setUserOnlineStatus(
+    @Ctx() context: RmqContext,
+    @Payload() setUserOnlineStatusDto: { isOnline: boolean; userId: number },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return await this.authService.setUserOnlineStatus(setUserOnlineStatusDto);
+  }
 }

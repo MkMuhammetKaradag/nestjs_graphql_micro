@@ -334,4 +334,20 @@ export class AuthService {
     await this.userRepository.save(user);
     return { profilPhoto: imageUrls };
   }
+
+  async setUserOnlineStatus(setUserOnlineStatusDto: {
+    userId: number;
+    isOnline: boolean;
+  }) {
+    const { userId, isOnline } = setUserOnlineStatusDto;
+    const user = await this.userRepository.findOneById(userId);
+    if (!user)
+      throw new RpcException({
+        message: 'user  not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    user.isOnline = isOnline;
+    await this.userRepository.save(user);
+    return user;
+  }
 }

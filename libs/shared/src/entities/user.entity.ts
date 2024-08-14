@@ -15,6 +15,7 @@ import { ShoppingCartEntity } from './shoppingCart.entity';
 import { Exclude } from 'class-transformer';
 import { ChatEntity } from './chat.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { MessageReadEntity } from './messageRead.entity';
 
 @ObjectType()
 @Entity('user')
@@ -39,13 +40,17 @@ export class UserEntity {
   @Column({ unique: true })
   email: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Column({ nullable: true })
   profilPhoto: string;
 
   @Field()
   @Column({ select: false })
   password: string;
+
+  @Field()
+  @Column({ default: false })
+  isOnline: boolean;
 
   @Field(() => [ProductEntity])
   @OneToMany(() => ProductEntity, (productEntity) => productEntity.vendor)
@@ -77,4 +82,8 @@ export class UserEntity {
   @Field(() => [ChatEntity])
   @ManyToMany(() => ChatEntity, (chat) => chat.users)
   chats: ChatEntity[];
+
+  @Field(() => [MessageReadEntity])
+  @OneToMany(() => MessageReadEntity, (messageRead) => messageRead.user)
+  readMessages: MessageReadEntity[];
 }

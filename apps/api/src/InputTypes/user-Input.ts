@@ -61,3 +61,11 @@ export class ResetPasswordInput {
   @IsNotEmpty({ message: 'Activation Token is required.' })
   activationToken: string;
 }
+
+@InputType()
+export class SetUserOnlineStatusInput {
+  @Field()
+  @IsNotEmpty({ message: 'Password is required.' })
+  isOnline: boolean;
+
+}

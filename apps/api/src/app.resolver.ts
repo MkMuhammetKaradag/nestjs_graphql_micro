@@ -23,6 +23,7 @@ import {
   ActivationInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  SetUserOnlineStatusInput,
   UserLoginInput,
   UserRegisterInput,
 } from './InputTypes/user-Input';
@@ -52,6 +53,7 @@ import { GraphQLError } from 'graphql';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { AppService } from './app.service';
 const USER_ADDED_EVENT = 'userAdded';
+const USER_STATUS_CHANGED = 'userStatusChanged';
 @Resolver('app')
 export class AppResolver {
   constructor(
@@ -212,21 +214,6 @@ export class AppResolver {
 
   @Mutation(() => String)
   async logout(@Context() context: { res: Response }) {
-    // try {
-    //   const data = await firstValueFrom<string>(
-    //     this.authService.send(
-    //       {
-    //         cmd: 'logout',
-    //       },
-    //       {
-    //         response: context.res,
-    //       },
-    //     ),
-    //   );
-    //   return data;
-    // } catch (error) {
-    //   throw new GraphQLError(error.message);
-    // }
     const { res } = context;
     try {
       res.clearCookie('mk_session', {
@@ -302,6 +289,49 @@ export class AppResolver {
         userId: req.user.id,
       },
     );
+  }
+
+  @Mutation(() => UserEntity)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async setUserOnlineStatus(
+    @Args('setUserOnlineStatusInput')
+    setUserOnlineStatusInput: SetUserOnlineStatusInput,
+    @Context() context,
+  ): Promise<UserEntity> {
+    const { res, req } = context;
+    if (!req?.user?.id) {
+      throw new ApolloError('user is required', 'USER_REQUIRED');
+    }
+    try {
+      const user = await firstValueFrom<UserEntity>(
+        this.authService.send(
+          {
+            cmd: 'set-userOnline-status',
+          },
+          {
+            isOnline: setUserOnlineStatusInput.isOnline,
+            userId: req.user.id,
+          },
+        ),
+      );
+      if (user) {
+        this.pubSub.publish(USER_STATUS_CHANGED, { userStatusChanged: user });
+      }
+      return user;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+  }
+
+  @Subscription(() => UserEntity, {
+    filter: (payload, variables) =>
+      payload.userStatusChanged.id === variables.userId,
+  })
+  userStatusChanged(@Args('userId') userId: number) {
+    return this.pubSub.asyncIterator(USER_STATUS_CHANGED);
   }
   // Auth End
 }
