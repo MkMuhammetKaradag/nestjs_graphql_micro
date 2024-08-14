@@ -2,6 +2,7 @@ import {
   DeepPartial,
   FindManyOptions,
   FindOneOptions,
+  SelectQueryBuilder,
   UpdateResult,
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
@@ -19,4 +20,6 @@ export interface BaseInterfaceRepository<T> {
   remove(data: T): Promise<T>;
   findWithRelations(relations: FindManyOptions<T>): Promise<T[]>;
   preload(entityLike: DeepPartial<T>): Promise<T>;
+
+  createQueryBuilder(alias: string): SelectQueryBuilder<T>;
 }

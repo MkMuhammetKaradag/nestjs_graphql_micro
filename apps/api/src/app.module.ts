@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   CloudinaryModule,
+  DateTimeScalar,
   PubSubModule,
   SharedModule,
   User,
@@ -46,6 +47,7 @@ import { ChatResolver } from './resolvers/chat.resolver';
         playground: Boolean(configService.get('GRAPHQL_PLAYGROUND')),
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
         uploads: false,
+
         context: ({ req, res, connection }) => {
           if (connection) {
             return { req: connection.context, res };

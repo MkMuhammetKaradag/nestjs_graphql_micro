@@ -4,6 +4,7 @@ import {
   FindOneOptions,
   FindOptionsWhere,
   Repository,
+  SelectQueryBuilder,
   UpdateResult,
 } from 'typeorm';
 
@@ -74,5 +75,9 @@ export abstract class BaseAbstractRepository<T extends HasId>
     options?: FindManyOptions<T>,
   ): Promise<[T[], number]> {
     return await this.entity.findAndCount(options);
+  }
+
+  public createQueryBuilder(alias: string): SelectQueryBuilder<T> {
+    return this.entity.createQueryBuilder(alias);
   }
 }

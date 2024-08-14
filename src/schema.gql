@@ -54,7 +54,8 @@ type MessageEntity {
   content: String!
   sender: UserEntity!
   chat: ChatEntity!
-  createdAt: DateTime!
+  isRead: Boolean!
+  createdAt: String!
 }
 
 type ChatEntity {
@@ -244,6 +245,7 @@ type Mutation {
   removeShoppingCartItemProduct(removeShoppingCartProductInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
   removeShoppingCartItem(removeShoppingCartItemInput: AddShoppingCartProductInput!): GetSoppingCartResponse!
   createChat(userIds: [Float!]!): ChatEntity!
+  sendMessage(sendMessageInput: SendMessageInput!): MessageEntity!
 }
 
 input UserRegisterInput {
@@ -296,8 +298,14 @@ input AddShoppingCartProductInput {
   productId: Float!
 }
 
+input SendMessageInput {
+  chatId: Float!
+  content: String!
+}
+
 type Subscription {
   userAdded: User!
   productCreated: Product!
   createCommentProduct(productId: Float!): Comment!
+  messageSent(chatId: Float!): MessageEntity!
 }

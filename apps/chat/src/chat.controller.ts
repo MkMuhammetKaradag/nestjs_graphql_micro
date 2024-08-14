@@ -23,7 +23,7 @@ export class ChatController {
   }
 
   @MessagePattern({ cmd: 'create-chat' })
-  async getProducts(
+  async getChat(
     @Ctx() context: RmqContext,
     @Payload()
     createChats: {
@@ -32,5 +32,19 @@ export class ChatController {
   ) {
     this.sharedService.acknowledgeMessage(context);
     return this.chatService.createChat(createChats);
+  }
+
+  @MessagePattern({ cmd: 'send-message' })
+  async sendMessage(
+    @Ctx() context: RmqContext,
+    @Payload()
+    sendMessage: {
+      chatId: number;
+      senderId: number;
+      content: string;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.chatService.sendMessage(sendMessage);
   }
 }
