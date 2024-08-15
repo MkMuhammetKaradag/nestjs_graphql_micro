@@ -27,6 +27,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { GraphQLError } from 'graphql';
 import {
+  GetChatInput,
   GetMessagesInput,
   MarkMessageAsReadInput,
   SendMessageInput,
@@ -64,6 +65,37 @@ export class ChatResolver {
         ),
       );
       return user;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+  }
+
+  @Query(() => ChatEntity)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async getChat(
+    @Args('getChatInput') getChatInput: GetChatInput,
+    @Context() context,
+  ): Promise<ChatEntity> {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+    try {
+      const chat = await firstValueFrom<ChatEntity>(
+        this.chatService.send(
+          {
+            cmd: 'get-chat',
+          },
+          {
+            userId: req.user.id,
+            chatId: getChatInput.chatId,
+          },
+        ),
+      );
+      return chat;
     } catch (error) {
       throw new GraphQLError(error.message, {
         extensions: { ...error },
@@ -131,6 +163,9 @@ export class ChatResolver {
         ),
       );
       if (data.message) {
+        console.log(data.users);
+        console.log(req.user.id);
+        console.log(data.users.includes(4));
         this.pubSub.publish(MESSAGE_SENT, {
           messageSent: {
             ...data.message,
@@ -161,7 +196,7 @@ export class ChatResolver {
         payload.messageSent.users,
         user.id,
       );
-
+      console.log(isUserInChat);
       // Mesajın doğru sohbette olup olmadığını ve kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
       return payload.messageSent.chat.id === chatId && isUserInChat;
     },
@@ -177,7 +212,7 @@ export class ChatResolver {
     // return chat.users.some(user => user.id === userId);
 
     // Örnek return değeri
-    return userId in users; // Kullanıcının bu sohbette olduğunu varsayıyoruz
+    return users.includes(userId); // Kullanıcının bu sohbette olduğunu varsayıyoruz
   }
 
   @Mutation(() => MessageReadEntity)
@@ -257,4 +292,7 @@ export class ChatResolver {
       });
     }
   }
+
+
+
 }

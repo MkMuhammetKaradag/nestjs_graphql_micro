@@ -41,3 +41,12 @@ export class GetMessagesInput {
   @IsNotEmpty({ message: 'id is required.' })
   skip: number;
 }
+
+@InputType()
+export class GetChatInput {
+  @Field()
+  @IsInt()
+  @Min(1)
+  @IsNotEmpty({ message: 'id is required.' })
+  chatId: number;
+}

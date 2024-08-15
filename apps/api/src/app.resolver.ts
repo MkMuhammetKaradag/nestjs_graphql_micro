@@ -304,7 +304,10 @@ export class AppResolver {
       throw new ApolloError('user is required', 'USER_REQUIRED');
     }
     try {
-      const user = await firstValueFrom<UserEntity>(
+      const data = await firstValueFrom<{
+        user: UserEntity;
+        chatsId: number[];
+      }>(
         this.authService.send(
           {
             cmd: 'set-userOnline-status',
@@ -315,10 +318,16 @@ export class AppResolver {
           },
         ),
       );
-      if (user) {
-        this.pubSub.publish(USER_STATUS_CHANGED, { userStatusChanged: user });
+      if (data.user) {
+        this.pubSub.publish(USER_STATUS_CHANGED, {
+          userStatusChanged: {
+            ...data.user,
+            chatsId: data.chatsId,
+          },
+        });
       }
-      return user;
+      console.log(data.user);
+      return data.user;
     } catch (error) {
       throw new GraphQLError(error.message, {
         extensions: { ...error },
@@ -326,11 +335,26 @@ export class AppResolver {
     }
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
   @Subscription(() => UserEntity, {
-    filter: (payload, variables) =>
-      payload.userStatusChanged.id === variables.userId,
+    filter: async function (payload, variables, context) {
+      const { req, res } = context;
+      if (!req?.user) {
+        throw new BadRequestException();
+      }
+      const user = req.user; // Kullanıcıyı context üzerinden alın
+      const chatId = variables.chatId;
+
+      // Kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
+      const isUserInChat = payload.userStatusChanged.chatsId.includes(chatId);
+
+      console.log(isUserInChat);
+      // Mesajın doğru sohbette olup olmadığını ve kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
+      return isUserInChat;
+    },
   })
-  userStatusChanged(@Args('userId') userId: number) {
+  userStatusChanged(@Args('chatId') chatId: number) {
     return this.pubSub.asyncIterator(USER_STATUS_CHANGED);
   }
   // Auth End

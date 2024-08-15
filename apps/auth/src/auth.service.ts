@@ -340,14 +340,32 @@ export class AuthService {
     isOnline: boolean;
   }) {
     const { userId, isOnline } = setUserOnlineStatusDto;
-    const user = await this.userRepository.findOneById(userId);
+    const user = await this.userRepository.findByCondition({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        isOnline: true,
+        chats: {
+          id: true,
+          users: {
+            id: true,
+          },
+        },
+      },
+      relations: ['chats', 'chats.users'],
+    });
     if (!user)
       throw new RpcException({
         message: 'user  not found',
         statusCode: HttpStatus.NOT_FOUND,
       });
     user.isOnline = isOnline;
+
+    const chatsId = user.chats.map((chat) => chat.id);
+
     await this.userRepository.save(user);
-    return user;
+    return { user, chatsId };
   }
 }

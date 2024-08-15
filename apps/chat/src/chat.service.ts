@@ -9,7 +9,7 @@ import {
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { userInfo } from 'os';
-import { map } from 'rxjs';
+import { last, map } from 'rxjs';
 import { In } from 'typeorm';
 
 @Injectable()
@@ -36,6 +36,46 @@ export class ChatService {
       where: { id: userId },
       relations: ['chats', 'chats.users'], // 'chats' relations field will fetch all chats the user is part of
     });
+  }
+
+  async getChat(getChatDto: { chatId: number; userId: number }) {
+    const { chatId, userId } = getChatDto;
+    const chat = await this.chatRepository.findByCondition({
+      where: { id: chatId },
+      select: {
+        id: true,
+        users: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          profilPhoto: true,
+          isOnline: true,
+        },
+      },
+      relations: ['users'],
+    });
+    // const chat = await this.chatRepository
+    //   .createQueryBuilder('chat')
+    //   .leftJoinAndSelect('chat.users', 'user')
+    //   .where('chat.id = :chatId', { chatId })
+    //   .andWhere('user.id = :userId', { userId })
+    //   .getOne();
+
+    if (!chat) {
+      throw new RpcException({
+        message: 'Chat not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    const userExists = chat.users.some((user) => user.id === userId);
+    if (!userExists) {
+      throw new RpcException({
+        message: 'USER UNAUTHORIZED',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
+
+    return chat;
   }
 
   async createChat(createChatProp: { userIds: number[] }) {
@@ -66,9 +106,9 @@ export class ChatService {
     const chat = await this.chatRepository.findByCondition({
       where: {
         id: chatId,
-        users: {
-          id: senderId,
-        },
+        // users: {
+        //   id: senderId,
+        // },
       },
       select: {
         id: true,
@@ -82,10 +122,30 @@ export class ChatService {
         statusCode: HttpStatus.NOT_FOUND,
       });
     }
+
+    const sender = await this.userRepository.findByCondition({
+      where: {
+        id: senderId,
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        isOnline: true,
+        profilPhoto: true,
+      },
+    });
+    if (!sender) {
+      throw new RpcException({
+        message: 'User not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    console.log(chat);
     const usersId = chat.users.map((user) => user.id);
     const message = this.messageRepository.create({
       content,
-      sender: { id: senderId },
+      sender: sender,
       chat: { id: chat.id },
     });
     await this.messageRepository.save(message);
@@ -154,6 +214,7 @@ export class ChatService {
         },
       },
     });
+
     if (!chat) {
       throw new RpcException({
         message: 'Chat not found',

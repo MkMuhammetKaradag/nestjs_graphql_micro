@@ -227,6 +227,7 @@ type Query {
   getComments(getCommentsInput: GetCommentsInput!): GetCommentsResponse!
   getMyShoppingCart: GetSoppingCartResponse!
   getUserChats: UserEntity!
+  getChat(getChatInput: GetChatInput!): ChatEntity!
   getMessages(getMessageInput: GetMessagesInput!): GetMessagesResponse!
 }
 
@@ -244,6 +245,10 @@ input GetCommentsInput {
   productId: Float!
   take: Float = 10
   skip: Float = 0
+}
+
+input GetChatInput {
+  chatId: Float!
 }
 
 input GetMessagesInput {
@@ -337,7 +342,7 @@ input MarkMessageAsReadInput {
 
 type Subscription {
   userAdded: User!
-  userStatusChanged(userId: Float!): UserEntity!
+  userStatusChanged(chatId: Float!): UserEntity!
   productCreated: Product!
   createCommentProduct(productId: Float!): Comment!
   messageSent(chatId: Float!): MessageEntity!
