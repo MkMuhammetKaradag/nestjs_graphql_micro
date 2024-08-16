@@ -37,6 +37,10 @@ import { ChatResolver } from './resolvers/chat.resolver';
       process.env.RABBITMQ_PRODUCT_QUEUE,
     ),
     SharedModule.registerRmq('CHAT_SERVICE', process.env.RABBITMQ_CHAT_QUEUE),
+    SharedModule.registerRmq(
+      'PAYMENT_SERVICE',
+      process.env.RABBITMQ_PAYMENT_QUEUE,
+    ),
 
     GraphQLModule.forRootAsync({
       imports: [ConfigModule],
