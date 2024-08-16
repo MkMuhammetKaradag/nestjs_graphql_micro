@@ -9,6 +9,7 @@ import { UserEntity } from './user.entity';
 import { ShoppingCartItemEntity } from './shoppingCartItem.Entity ';
 import { Exclude, Transform } from 'class-transformer';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { PaymentEntity } from './payment.entity';
 
 @ObjectType()
 @Entity('shopping_cart')
@@ -28,6 +29,10 @@ export class ShoppingCartEntity {
   })
   @Exclude() // ShoppingCartItemEntity ve ShoppingCartEntity içinde döngüsel referansları dışlayın:
   items: ShoppingCartItemEntity[];
+
+  @Field(() => [PaymentEntity])
+  @OneToMany(() => PaymentEntity, (payment) => payment.cart)
+  payments: PaymentEntity[];
 
   toJSON() {
     const { user, ...rest } = this;

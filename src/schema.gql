@@ -43,10 +43,21 @@ type ShoppingCartItemEntity {
   quantity: Float!
 }
 
+type PaymentEntity {
+  id: ID!
+  amount: Float!
+  currency: String!
+  status: String!
+  createdAt: DateTime!
+  user: UserEntity!
+  cart: ShoppingCartEntity!
+}
+
 type ShoppingCartEntity {
   id: ID!
   user: UserEntity!
   items: [ShoppingCartItemEntity!]!
+  payments: [PaymentEntity!]!
 }
 
 type MessageReadEntity {
@@ -86,6 +97,7 @@ type UserEntity {
   likes: [LikeEntity!]!
   chats: [ChatEntity!]!
   readMessages: [MessageReadEntity!]!
+  payments: [PaymentEntity!]!
 }
 
 type Comment {

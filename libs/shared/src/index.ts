@@ -22,6 +22,7 @@ export * from './repositories/shoppingCartItem.repository';
 export * from './repositories/chat.repository';
 export * from './repositories/message.repository';
 export * from './repositories/messageRead.repository';
+export * from './repositories/payment.repository';
 
 // Entities
 export * from './entities/user.entity';
@@ -33,6 +34,7 @@ export * from './entities/shoppingCartItem.Entity ';
 export * from './entities/chat.entity';
 export * from './entities/message.entity';
 export * from './entities/messageRead.entity';
+export * from './entities/payment.entity';
 
 //interfacs
 export * from './interfaces/user.repository.interface';
@@ -46,6 +48,7 @@ export * from './interfaces/shoppingCartItems.repository.interface';
 export * from './interfaces/message.repository.interface';
 export * from './interfaces/chat.repository.interface';
 export * from './interfaces/messageRead.repository.interface';
+export * from './interfaces/payment.repository.interface';
 
 // quards
 export * from './guards/auth.guard';

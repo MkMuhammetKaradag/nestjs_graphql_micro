@@ -16,6 +16,7 @@ import { Exclude } from 'class-transformer';
 import { ChatEntity } from './chat.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { MessageReadEntity } from './messageRead.entity';
+import { PaymentEntity } from './payment.entity';
 
 @ObjectType()
 @Entity('user')
@@ -86,4 +87,8 @@ export class UserEntity {
   @Field(() => [MessageReadEntity])
   @OneToMany(() => MessageReadEntity, (messageRead) => messageRead.user)
   readMessages: MessageReadEntity[];
+
+  @Field(() => [PaymentEntity])
+  @OneToMany(() => PaymentEntity, (payment) => payment.user)
+  payments: PaymentEntity[];
 }
