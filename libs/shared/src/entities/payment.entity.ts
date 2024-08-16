@@ -20,7 +20,7 @@ import {
     amount: number;
   
     @Field()
-    @Column()
+    @Column({default:"TL"})
     currency: string;
   
     @Field()

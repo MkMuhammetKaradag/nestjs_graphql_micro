@@ -20,6 +20,7 @@ import { ProductResolver } from './resolvers/product.resolver';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ShoppingCartResolver } from './resolvers/shoppingCart.resolver';
 import { ChatResolver } from './resolvers/chat.resolver';
+import { PaymentResolver } from './resolvers/payment.resolver';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { ChatResolver } from './resolvers/chat.resolver';
     ProductResolver,
     ShoppingCartResolver,
     ChatResolver,
+    PaymentResolver,
   ],
 })
 export class AppModule {}

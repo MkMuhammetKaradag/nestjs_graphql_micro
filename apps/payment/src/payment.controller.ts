@@ -26,10 +26,13 @@ export class PaymentController {
     @Ctx() context: RmqContext,
     @Payload()
     createdPaymentDto: {
+      cartId: number;
       userId: number;
+      amount: number;
     },
   ) {
     this.sharedService.acknowledgeMessage(context);
-    return 'payment success';
+   
+    return this.paymentService.createPayment(createdPaymentDto);
   }
 }

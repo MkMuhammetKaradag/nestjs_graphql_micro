@@ -9,13 +9,17 @@ import {
   MessageEntity,
   MessageReadEntity,
   PaymentEntity,
+  PaymentsRepository,
   PostgresDBModule,
   ProductEntity,
+  ProductsRepository,
   SharedModule,
   SharedService,
   ShoppingCartEntity,
   ShoppingCartItemEntity,
+  ShoppingCartsRepository,
   UserEntity,
+  UsersRepository,
 } from '@app/shared';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -45,6 +49,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     {
       provide: 'SharedServiceInterface',
       useClass: SharedService,
+    },
+    {
+      provide: 'ProductsRepositoryInterface',
+      useClass: ProductsRepository,
+    },
+    {
+      provide: 'UsersRepositoryInterface',
+      useClass: UsersRepository,
+    },
+    {
+      provide: 'ShoppingCartsRepositoryInterface',
+      useClass: ShoppingCartsRepository,
+    },
+    {
+      provide: 'PaymentsRepositoryInterface',
+      useClass: PaymentsRepository,
     },
   ],
 })
