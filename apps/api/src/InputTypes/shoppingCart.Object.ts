@@ -14,6 +14,9 @@ export class GetSoppingCartResponse {
 
 @ObjectType()
 export class AddSoppingCartResponse {
+  @Field()
+  id: number;
+
   @Field(() => Product, { nullable: true })
   product?: Product;
 

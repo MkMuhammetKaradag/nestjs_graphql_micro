@@ -98,6 +98,7 @@ export class PaymentService {
       user: userWithCart,
       amount,
       status: 'pending',
+      chargeId: source,
     });
 
     // Reduce the stock quantity of each product
@@ -108,26 +109,23 @@ export class PaymentService {
       product.quantity -= item.quantity;
       await this.productRepository.save(product);
     }
-    const charge = await this.stripeService.createCharge(
-      amount,
-      'usd',
-      source,
-      `${payment.id} payment id li    ${userId}  id li user tarafından geçekleşti`,
-    );
-    if (!charge) {
-      throw new RpcException({
-        message: `Failed to create charge for payment ${payment.id}`,
-        statusCode: HttpStatus.BAD_REQUEST,
-      });
-    }
 
-    payment.chargeId = charge.id;
-
-    // const newCart = new ShoppingCartEntity();
-    // newCart.user = userWithCart;
     userWithCart.shoppingCart = null;
     await this.userRepository.save(userWithCart);
 
     return await this.paymentRepository.save(payment);
+  }
+
+  async createPaymentIntent(createdPaymentDto: {
+    cartId: number;
+    userId: number;
+    amount: number;
+  }) {
+    const { cartId, userId, amount } = createdPaymentDto;
+    const paymentIntent = await this.stripeService.createCharge(
+      amount * 100,
+      'usd',
+    );
+    return paymentIntent.client_secret;
   }
 }

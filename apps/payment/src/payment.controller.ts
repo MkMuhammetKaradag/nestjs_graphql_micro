@@ -22,7 +22,7 @@ export class PaymentController {
   }
 
   @MessagePattern({ cmd: 'create-payment' })
-  async getUserChats(
+  async createPayment(
     @Ctx() context: RmqContext,
     @Payload()
     createdPaymentDto: {
@@ -35,5 +35,20 @@ export class PaymentController {
     this.sharedService.acknowledgeMessage(context);
 
     return this.paymentService.createPayment(createdPaymentDto);
+  }
+
+  @MessagePattern({ cmd: 'create-payment-intent' })
+  async createPaymentIntent(
+    @Ctx() context: RmqContext,
+    @Payload()
+    createdPaymentDto: {
+      cartId: number;
+      userId: number;
+      amount: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+
+    return this.paymentService.createPaymentIntent(createdPaymentDto);
   }
 }

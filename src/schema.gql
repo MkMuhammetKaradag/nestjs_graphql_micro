@@ -219,6 +219,7 @@ type GetSoppingCartResponse {
 }
 
 type AddSoppingCartResponse {
+  id: Float!
   product: Product
   error: ErrorType
 }
@@ -288,7 +289,8 @@ type Mutation {
   createChat(userIds: [Float!]!): ChatEntity!
   sendMessage(sendMessageInput: SendMessageInput!): MessageEntity!
   markMessageAsRead(markMessageAsReadInput: MarkMessageAsReadInput!): MessageReadEntity!
-  createPayment(cartId: Float!, amount: Float!, source: String!): PaymentEntity!
+  createPayment(createPaymentInput: CreatePaymentInput!): PaymentEntity!
+  createPaymentIntent(createPaymentIntentInput: CreatePaymentIntentInput!): String!
 }
 
 input UserRegisterInput {
@@ -352,6 +354,17 @@ input SendMessageInput {
 
 input MarkMessageAsReadInput {
   messageId: Float!
+}
+
+input CreatePaymentInput {
+  cartId: Float!
+  amount: Float!
+  source: String!
+}
+
+input CreatePaymentIntentInput {
+  cartId: Float!
+  amount: Float!
 }
 
 type Subscription {

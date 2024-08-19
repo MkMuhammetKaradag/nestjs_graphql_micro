@@ -1,4 +1,10 @@
-import { AuthGuard, PaymentEntity, Roles, RolesGuard } from '@app/shared';
+import {
+  AuthGuard,
+  PaymentEntity,
+  Roles,
+  RolesGuard,
+  StripeService,
+} from '@app/shared';
 import { BadRequestException, Inject, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ClientProxy } from '@nestjs/microservices';
@@ -13,21 +19,26 @@ import {
   GetShoppingCartInput,
 } from '../InputTypes/shoppingCart.Input';
 import { GraphQLError } from 'graphql';
+import {
+  CreatePaymentInput,
+  CreatePaymentIntentInput,
+} from '../InputTypes/payment.Input';
 
 Resolver('payment');
 export class PaymentResolver {
   constructor(
     @Inject('PAYMENT_SERVICE')
     private readonly paymentService: ClientProxy,
+
+    private readonly stripeService: StripeService,
   ) {}
 
   @Mutation(() => PaymentEntity)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('user')
   async createPayment(
-    @Args('cartId') cartId: number,
-    @Args('amount') amount: number,
-    @Args('source') source: string,
+    @Args('createPaymentInput') createPaymentInput: CreatePaymentInput,
+
     @Context() context,
   ): Promise<PaymentEntity> {
     const { req, res } = context;
@@ -41,10 +52,46 @@ export class PaymentResolver {
             cmd: 'create-payment',
           },
           {
-            cartId: cartId,
+            cartId: createPaymentInput.cartId,
             userId: req.user.id,
-            amount: amount,
-            source: source,
+            amount: createPaymentInput.amount,
+            source: createPaymentInput.source,
+          },
+        ),
+      );
+      return payment;
+    } catch (error) {
+      console.log(createPaymentInput.source);
+      // await this.stripeService.cancelPaymentIntent(createPaymentInput.source);
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+  }
+
+  @Mutation(() => String)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async createPaymentIntent(
+    @Args('createPaymentIntentInput')
+    createPaymentIntentInput: CreatePaymentIntentInput,
+
+    @Context() context,
+  ): Promise<string> {
+    const { req, res } = context;
+    if (!req?.user) {
+      throw new BadRequestException();
+    }
+    try {
+      const payment = await firstValueFrom<string>(
+        this.paymentService.send(
+          {
+            cmd: 'create-payment-intent',
+          },
+          {
+            userId: req.user.id,
+            amount: createPaymentIntentInput.amount,
+            cartdId: createPaymentIntentInput.cartId,
           },
         ),
       );
@@ -54,5 +101,11 @@ export class PaymentResolver {
         extensions: { ...error },
       });
     }
+    // const paymentIntent = await this.stripe.paymentIntents.create({
+    //   amount,
+    //   currency,
+    // });
+
+    // return paymentIntent.client_secret;
   }
 }

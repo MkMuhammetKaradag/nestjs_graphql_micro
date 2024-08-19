@@ -15,18 +15,24 @@ export class StripeService {
     );
   }
 
-  async createCharge(
-    amount: number,
-    currency: string,
-    source: string,
-    description: string,
-  ) {
-    return await this.stripe.charges.create({
+  async createCharge(amount: number, currency: string) {
+    return await this.stripe.paymentIntents.create({
       amount,
       currency,
-      source,
-      description,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      // description,
     });
+  }
+
+  async cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+    try {
+      return await this.stripe.paymentIntents.cancel(paymentIntentId);
+    } catch (error) {
+      console.error('Payment intent cancellation failed:', error);
+      throw new Error('Failed to cancel payment intent.');
+    }
   }
 
   // Diğer Stripe işlemleri burada tanımlanabilir

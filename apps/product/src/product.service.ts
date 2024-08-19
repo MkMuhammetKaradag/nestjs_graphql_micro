@@ -252,9 +252,12 @@ export class ProductService {
       userWithCart.shoppingCart.items.push(newItem);
     }
 
-    await this.shoppingCartRepository.save(userWithCart.shoppingCart);
+    const shoppingCart = await this.shoppingCartRepository.save(
+      userWithCart.shoppingCart,
+    );
 
     return {
+      id: shoppingCart.id,
       product: product,
     };
   }

@@ -7,6 +7,8 @@ import {
   DateTimeScalar,
   PubSubModule,
   SharedModule,
+  StripeModule,
+  StripeService,
   User,
   UserSchema,
 } from '@app/shared';
@@ -32,6 +34,7 @@ import { PaymentResolver } from './resolvers/payment.resolver';
       isGlobal: true,
     }),
     CloudinaryModule,
+    StripeModule,
     SharedModule.registerRmq('AUTH_SERVICE', process.env.RABBITMQ_AUTH_QUEUE),
     SharedModule.registerRmq(
       'PRODUCT_SERVICE',
@@ -88,6 +91,7 @@ import { PaymentResolver } from './resolvers/payment.resolver';
   ],
   controllers: [AppController],
   providers: [
+    StripeService,
     AppService,
     AppResolver,
     ProductResolver,
