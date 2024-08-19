@@ -3,6 +3,7 @@ import {
   PaymentRepositoryInterface,
   ShoppingCartEntity,
   ShoppingCartRepositoryInterface,
+  StripeService,
   UserRepositoryInterface,
 } from '@app/shared';
 import { ProductRepositoryInterface } from '@app/shared/interfaces/product-repository.interface';
@@ -23,6 +24,8 @@ export class PaymentService {
 
     @Inject('PaymentsRepositoryInterface')
     private readonly paymentRepository: PaymentRepositoryInterface,
+
+    private readonly stripeService: StripeService,
   ) {}
 
   getHello(): string {
@@ -33,8 +36,9 @@ export class PaymentService {
     cartId: number;
     userId: number;
     amount: number;
+    source: string;
   }) {
-    const { cartId, userId, amount } = createdPaymentDto;
+    const { cartId, userId, amount, source } = createdPaymentDto;
 
     const cart = await this.shoppingCartRepository.findByCondition({
       where: {
@@ -88,13 +92,14 @@ export class PaymentService {
     }
 
     // If stock is sufficient, proceed to create the payment
+
     const payment = this.paymentRepository.create({
       cart,
       user: userWithCart,
       amount,
       status: 'pending',
     });
-  
+
     // Reduce the stock quantity of each product
     for (const item of cart.items) {
       const product = await this.productRepository.findByCondition({
@@ -103,12 +108,26 @@ export class PaymentService {
       product.quantity -= item.quantity;
       await this.productRepository.save(product);
     }
+    const charge = await this.stripeService.createCharge(
+      amount,
+      'usd',
+      source,
+      `${payment.id} payment id li    ${userId}  id li user tarafından geçekleşti`,
+    );
+    if (!charge) {
+      throw new RpcException({
+        message: `Failed to create charge for payment ${payment.id}`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    payment.chargeId = charge.id;
 
     // const newCart = new ShoppingCartEntity();
     // newCart.user = userWithCart;
     userWithCart.shoppingCart = null;
     await this.userRepository.save(userWithCart);
- 
+
     return await this.paymentRepository.save(payment);
   }
 }

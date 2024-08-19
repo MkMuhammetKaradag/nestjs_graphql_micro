@@ -163,9 +163,9 @@ export class ChatResolver {
         ),
       );
       if (data.message) {
-        console.log(data.users);
-        console.log(req.user.id);
-        console.log(data.users.includes(4));
+        // console.log(data.users);
+        // console.log(req.user.id);
+        // console.log(data.users.includes(4));
         this.pubSub.publish(MESSAGE_SENT, {
           messageSent: {
             ...data.message,
@@ -196,7 +196,7 @@ export class ChatResolver {
         payload.messageSent.users,
         user.id,
       );
-      console.log(isUserInChat);
+      // console.log(isUserInChat);
       // Mesajın doğru sohbette olup olmadığını ve kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
       return payload.messageSent.chat.id === chatId && isUserInChat;
     },

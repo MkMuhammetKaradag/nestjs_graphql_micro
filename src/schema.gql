@@ -47,6 +47,7 @@ type PaymentEntity {
   id: ID!
   amount: Float!
   currency: String!
+  chargeId: String!
   status: String!
   createdAt: DateTime!
   user: UserEntity!
@@ -287,7 +288,7 @@ type Mutation {
   createChat(userIds: [Float!]!): ChatEntity!
   sendMessage(sendMessageInput: SendMessageInput!): MessageEntity!
   markMessageAsRead(markMessageAsReadInput: MarkMessageAsReadInput!): MessageReadEntity!
-  createPayment(cartId: Float!, amount: Float!): PaymentEntity!
+  createPayment(cartId: Float!, amount: Float!, source: String!): PaymentEntity!
 }
 
 input UserRegisterInput {

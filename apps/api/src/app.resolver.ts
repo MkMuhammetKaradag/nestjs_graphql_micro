@@ -79,7 +79,7 @@ export class AppResolver {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin')
   getAdminData(@Context() context) {
-    console.log('admin içi', context?.req?.user);
+    // console.log('admin içi', context?.req?.user);
     return 'Admin Data';
   }
 
@@ -93,7 +93,7 @@ export class AppResolver {
   @Query(() => [User])
   @UseGuards(AuthGuard)
   async getUsers() {
-    console.log('hello api');
+    // console.log('hello api');
     return this.authService.send(
       {
         cmd: 'get_users',
@@ -155,7 +155,7 @@ export class AppResolver {
       }
       return data;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new GraphQLError(error.message, {
         extensions: { ...error },
       });
@@ -205,7 +205,7 @@ export class AppResolver {
 
       return data;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       throw new GraphQLError(error.message, {
         extensions: { ...error },
       });
@@ -326,7 +326,7 @@ export class AppResolver {
           },
         });
       }
-      console.log(data.user);
+      // console.log(data.user);
       return data.user;
     } catch (error) {
       throw new GraphQLError(error.message, {
@@ -349,7 +349,7 @@ export class AppResolver {
       // Kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
       const isUserInChat = payload.userStatusChanged.chatsId.includes(chatId);
 
-      console.log(isUserInChat);
+      // console.log(isUserInChat);
       // Mesajın doğru sohbette olup olmadığını ve kullanıcının bu sohbetin bir parçası olup olmadığını kontrol edin
       return isUserInChat;
     },

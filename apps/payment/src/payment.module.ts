@@ -18,6 +18,8 @@ import {
   ShoppingCartEntity,
   ShoppingCartItemEntity,
   ShoppingCartsRepository,
+  StripeModule,
+  StripeService,
   UserEntity,
   UsersRepository,
 } from '@app/shared';
@@ -30,6 +32,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     SharedModule,
     PostgresDBModule,
+    StripeModule,
     TypeOrmModule.forFeature([
       UserEntity,
       ProductEntity,
@@ -45,6 +48,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   ],
   controllers: [PaymentController],
   providers: [
+    StripeService,
     PaymentService,
     {
       provide: 'SharedServiceInterface',

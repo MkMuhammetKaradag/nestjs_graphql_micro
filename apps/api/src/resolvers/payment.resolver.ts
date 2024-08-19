@@ -27,6 +27,7 @@ export class PaymentResolver {
   async createPayment(
     @Args('cartId') cartId: number,
     @Args('amount') amount: number,
+    @Args('source') source: string,
     @Context() context,
   ): Promise<PaymentEntity> {
     const { req, res } = context;
@@ -43,6 +44,7 @@ export class PaymentResolver {
             cartId: cartId,
             userId: req.user.id,
             amount: amount,
+            source: source,
           },
         ),
       );
