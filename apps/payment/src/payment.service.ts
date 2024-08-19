@@ -37,8 +37,15 @@ export class PaymentService {
     userId: number;
     amount: number;
     source: string;
+    paymentId: number;
   }) {
-    const { cartId, userId, amount, source } = createdPaymentDto;
+    const { cartId, userId, amount, source, paymentId } = createdPaymentDto;
+    if (!(await this.stripeService.confirmPayment(source))) {
+      throw new RpcException({
+        message: 'Payment failed',
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
 
     const cart = await this.shoppingCartRepository.findByCondition({
       where: {
@@ -54,9 +61,9 @@ export class PaymentService {
       where: { id: userId },
       relations: ['shoppingCart'],
     });
-
+    const payment = await this.paymentRepository.findOneById(paymentId);
     // Check stock levels for each item in the cart
-    if (!cart || !userWithCart) {
+    if (!cart || !userWithCart || !payment) {
       throw new RpcException({
         message: 'Cart not found',
         statusCode: HttpStatus.NOT_FOUND,
@@ -91,16 +98,6 @@ export class PaymentService {
       });
     }
 
-    // If stock is sufficient, proceed to create the payment
-
-    const payment = this.paymentRepository.create({
-      cart,
-      user: userWithCart,
-      amount,
-      status: 'pending',
-      chargeId: source,
-    });
-
     // Reduce the stock quantity of each product
     for (const item of cart.items) {
       const product = await this.productRepository.findByCondition({
@@ -109,7 +106,7 @@ export class PaymentService {
       product.quantity -= item.quantity;
       await this.productRepository.save(product);
     }
-
+    payment.status = 'succeeded';
     userWithCart.shoppingCart = null;
     await this.userRepository.save(userWithCart);
 
@@ -121,11 +118,26 @@ export class PaymentService {
     userId: number;
     amount: number;
   }) {
+    console.log('paymentIntent');
     const { cartId, userId, amount } = createdPaymentDto;
     const paymentIntent = await this.stripeService.createCharge(
       amount * 100,
       'usd',
     );
-    return paymentIntent.client_secret;
+
+    const payment = this.paymentRepository.create({
+      cart: { id: cartId },
+      user: {
+        id: userId,
+      },
+      amount,
+      status: 'pending',
+      chargeId: paymentIntent.id,
+    });
+    await this.paymentRepository.save(payment);
+    return {
+      clientSecret: paymentIntent.client_secret,
+      paymentId: payment.id,
+    };
   }
 }

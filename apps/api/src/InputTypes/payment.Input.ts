@@ -12,6 +12,12 @@ export class CreatePaymentInput {
   @Field()
   @IsInt()
   @Min(1)
+  @IsNotEmpty({ message: 'payment id is required.' })
+  paymentId: number;
+
+  @Field()
+  @IsInt()
+  @Min(1)
   @IsNotEmpty({ message: 'id is required.' })
   amount: number;
 

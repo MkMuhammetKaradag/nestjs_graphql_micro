@@ -30,6 +30,7 @@ export class PaymentController {
       userId: number;
       amount: number;
       source: string;
+      paymentId: number;
     },
   ) {
     this.sharedService.acknowledgeMessage(context);
@@ -48,7 +49,7 @@ export class PaymentController {
     },
   ) {
     this.sharedService.acknowledgeMessage(context);
-
+    console.log('controller');
     return this.paymentService.createPaymentIntent(createdPaymentDto);
   }
 }

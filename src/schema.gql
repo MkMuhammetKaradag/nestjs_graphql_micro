@@ -230,6 +230,11 @@ type GetMessagesResponse {
   error: ErrorType
 }
 
+type CreatePaymentIntentResponse {
+  clientSecret: String!
+  paymentId: Float!
+}
+
 type Query {
   getAdminData: String!
   getUserData: String!
@@ -290,7 +295,7 @@ type Mutation {
   sendMessage(sendMessageInput: SendMessageInput!): MessageEntity!
   markMessageAsRead(markMessageAsReadInput: MarkMessageAsReadInput!): MessageReadEntity!
   createPayment(createPaymentInput: CreatePaymentInput!): PaymentEntity!
-  createPaymentIntent(createPaymentIntentInput: CreatePaymentIntentInput!): String!
+  createPaymentIntent(createPaymentIntentInput: CreatePaymentIntentInput!): CreatePaymentIntentResponse!
 }
 
 input UserRegisterInput {
@@ -358,6 +363,7 @@ input MarkMessageAsReadInput {
 
 input CreatePaymentInput {
   cartId: Float!
+  paymentId: Float!
   amount: Float!
   source: String!
 }

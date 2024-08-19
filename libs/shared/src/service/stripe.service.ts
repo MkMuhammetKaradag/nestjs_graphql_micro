@@ -33,7 +33,19 @@ export class StripeService {
       console.error('Payment intent cancellation failed:', error);
       throw new Error('Failed to cancel payment intent.');
     }
-  }
 
+    
+  }
+  async confirmPayment(paymentIntentId: string): Promise<boolean> {
+    const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+    if (paymentIntent.status === 'succeeded') {
+      // Ödeme başarılı olduğunda veritabanını güncelle
+      return true
+      
+    } else {
+      throw new Error('Payment not succeeded');
+    }
+  }
   // Diğer Stripe işlemleri burada tanımlanabilir
 }

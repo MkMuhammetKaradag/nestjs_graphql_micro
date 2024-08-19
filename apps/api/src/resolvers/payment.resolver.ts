@@ -14,15 +14,13 @@ import {
   AddSoppingCartResponse,
   GetSoppingCartResponse,
 } from '../InputTypes/shoppingCart.Object';
-import {
-  AddShoppingCartProductInput,
-  GetShoppingCartInput,
-} from '../InputTypes/shoppingCart.Input';
+
 import { GraphQLError } from 'graphql';
 import {
   CreatePaymentInput,
   CreatePaymentIntentInput,
 } from '../InputTypes/payment.Input';
+import { CreatePaymentIntentResponse } from '../InputTypes/payment.object';
 
 Resolver('payment');
 export class PaymentResolver {
@@ -56,6 +54,7 @@ export class PaymentResolver {
             userId: req.user.id,
             amount: createPaymentInput.amount,
             source: createPaymentInput.source,
+            paymentId: createPaymentInput.paymentId,
           },
         ),
       );
@@ -69,7 +68,7 @@ export class PaymentResolver {
     }
   }
 
-  @Mutation(() => String)
+  @Mutation(() => CreatePaymentIntentResponse)
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('user')
   async createPaymentIntent(
@@ -77,13 +76,15 @@ export class PaymentResolver {
     createPaymentIntentInput: CreatePaymentIntentInput,
 
     @Context() context,
-  ): Promise<string> {
+  ): Promise<CreatePaymentIntentResponse> {
     const { req, res } = context;
     if (!req?.user) {
       throw new BadRequestException();
     }
+
     try {
-      const payment = await firstValueFrom<string>(
+      console.log(createPaymentIntentInput);
+      const payment = await firstValueFrom<CreatePaymentIntentResponse>(
         this.paymentService.send(
           {
             cmd: 'create-payment-intent',
@@ -91,10 +92,11 @@ export class PaymentResolver {
           {
             userId: req.user.id,
             amount: createPaymentIntentInput.amount,
-            cartdId: createPaymentIntentInput.cartId,
+            cartId: createPaymentIntentInput.cartId,
           },
         ),
       );
+
       return payment;
     } catch (error) {
       throw new GraphQLError(error.message, {
