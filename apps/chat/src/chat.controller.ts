@@ -100,4 +100,17 @@ export class ChatController {
     this.sharedService.acknowledgeMessage(context);
     return this.chatService.getMessages(getMessagesDto);
   }
+
+  @MessagePattern({ cmd: 'join-videoRoom' })
+  async joinVideoRoom(
+    @Ctx() context: RmqContext,
+    @Payload()
+    joinVideoRoomDto: {
+      chatId: number;
+      userId: number;
+    },
+  ) {
+    this.sharedService.acknowledgeMessage(context);
+    return this.chatService.joinVideoRoom(joinVideoRoomDto);
+  }
 }

@@ -1,6 +1,7 @@
 import {
   ChatRepositoryInterface,
   ChatsRepository,
+  LivekitService,
   MessageReadRepositoryInterface,
   MessageReadsRepository,
   MessageRepositoryInterface,
@@ -26,6 +27,8 @@ export class ChatService {
 
     @Inject('MessageReadsRepositoryInterface')
     private readonly messageReadRepository: MessageReadsRepository,
+
+    private readonly liveKitService: LivekitService,
   ) {}
   getHello(): string {
     return 'Hello World!';
@@ -79,7 +82,7 @@ export class ChatService {
   }
 
   async createChat(createChatProp: { userIds: number[] }) {
-    console.log(createChatProp);
+    // console.log(createChatProp);
     const users = await this.userRepository.findWithRelations({
       where: {
         id: In(createChatProp.userIds),
@@ -91,8 +94,17 @@ export class ChatService {
     }
 
     const chat = this.chatRepository.create({ users });
-    await this.chatRepository.save(chat);
 
+    const roomName = `chat-${chat.id}`;
+    try {
+      await this.liveKitService.createRoom(roomName);
+    } catch (error) {
+      throw new RpcException({
+        message: 'Livekit oluşturulurken bir hata oldu',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
+    await this.chatRepository.save(chat);
     return chat;
   }
 
@@ -242,5 +254,29 @@ export class ChatService {
     });
 
     return { messages, total };
+  }
+
+  async joinVideoRoom(joinVideoRoom: { chatId: number; userId: number }) {
+    const { chatId, userId } = joinVideoRoom;
+    const chat = await this.chatRepository.findByCondition({
+      where: {
+        id: chatId,
+        users: {
+          id: userId,
+        },
+      },
+    });
+    if (!chat) {
+      throw new RpcException({
+        message: 'Chat not found',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
+    }
+    const roomName = `chat-${chat.id}`;
+    const token = this.liveKitService.generateToken(
+      roomName,
+      userId.toString(),
+    ); // User kimliğiyle token oluşturma
+    return token;
   }
 }

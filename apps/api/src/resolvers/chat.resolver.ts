@@ -293,6 +293,35 @@ export class ChatResolver {
     }
   }
 
-
-
+  @Mutation(() => String)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('user')
+  async joinVideoRoom(
+    @Args('chatId')
+    chatId: number,
+    @Context() context,
+  ): Promise<string> {
+    const { req, res } = context;
+    if (!req?.user.id) {
+      throw new BadRequestException();
+    }
+    try {
+      const token = await firstValueFrom<string>(
+        this.chatService.send(
+          {
+            cmd: 'join-videoRoom',
+          },
+          {
+            chatId,
+            userId: req.user.id,
+          },
+        ),
+      );
+      return token;
+    } catch (error) {
+      throw new GraphQLError(error.message, {
+        extensions: { ...error },
+      });
+    }
+  }
 }

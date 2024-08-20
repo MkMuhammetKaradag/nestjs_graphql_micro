@@ -7,6 +7,7 @@ import {
   ChatsRepository,
   CommentEntity,
   LikeEntity,
+  LivekitModule,
   MessageEntity,
   MessageReadEntity,
   MessageReadsRepository,
@@ -30,6 +31,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     SharedModule,
     PostgresDBModule,
+    LivekitModule,
     TypeOrmModule.forFeature([
       UserEntity,
       ProductEntity,

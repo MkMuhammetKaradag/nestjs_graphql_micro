@@ -6,6 +6,7 @@ export * from './modules/email.module';
 export * from './modules/pubSub.module';
 export * from './modules/cloudinary.module';
 export * from './modules/stripe.module';
+export * from "./modules/liveKit.module"
 // schemas
 export * from './schemas/user.schema';
 // Services
@@ -13,6 +14,7 @@ export * from './service/shared.service';
 export * from './service/email.service';
 export * from './service/cloudinary.service';
 export * from './service/stripe.service';
+export * from './service/liveKit.service';
 
 //Repositories
 export * from './repositories/user.repository';
