@@ -31,7 +31,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     SharedModule,
     PostgresDBModule,
-    LivekitModule,
     TypeOrmModule.forFeature([
       UserEntity,
       ProductEntity,
@@ -44,6 +43,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       MessageReadEntity,
       PaymentEntity,
     ]),
+    LivekitModule,
   ],
   controllers: [ChatController],
   providers: [

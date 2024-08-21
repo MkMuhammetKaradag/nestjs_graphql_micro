@@ -60,7 +60,7 @@ export class PaymentResolver {
       );
       return payment;
     } catch (error) {
-      console.log(createPaymentInput.source);
+      // console.log(createPaymentInput.source);
       // await this.stripeService.cancelPaymentIntent(createPaymentInput.source);
       throw new GraphQLError(error.message, {
         extensions: { ...error },
@@ -83,7 +83,7 @@ export class PaymentResolver {
     }
 
     try {
-      console.log(createPaymentIntentInput);
+      // console.log(createPaymentIntentInput);
       const payment = await firstValueFrom<CreatePaymentIntentResponse>(
         this.paymentService.send(
           {

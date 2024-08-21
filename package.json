@@ -47,7 +47,7 @@
     "graphql-subscriptions": "^2.0.0",
     "graphql-tools": "^9.0.1",
     "graphql-upload": "^14.0.0",
-    "livekit-server-sdk": "^2.6.1",
+    "livekit-server-sdk": "^1.2.7",
     "mongoose": "^8.5.1",
     "nodemailer": "^6.9.14",
     "passport": "^0.7.0",

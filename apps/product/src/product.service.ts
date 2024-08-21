@@ -235,7 +235,8 @@ export class ProductService {
 
     if (existingItem) {
       // Ürün zaten sepetin içindeyse, miktarını artır
-      if (product.quantity > existingItem.quantity) {
+
+      if (product.quantity < existingItem.quantity) {
         existingItem.quantity += 1;
       } else {
         throw new RpcException({
@@ -250,6 +251,11 @@ export class ProductService {
       newItem.cart = userWithCart.shoppingCart;
       newItem.quantity = 1;
       userWithCart.shoppingCart.items.push(newItem);
+    } else {
+      throw new RpcException({
+        message: 'The product is not in stock.',
+        statusCode: HttpStatus.NOT_FOUND,
+      });
     }
 
     const shoppingCart = await this.shoppingCartRepository.save(
@@ -280,7 +286,7 @@ export class ProductService {
     // Eğer kullanıcının sepeti yoksa, işlem yapmaya gerek yok
     if (!userWithCart.shoppingCart) {
       throw new RpcException({
-        message: 'The product is not in Basket.',
+        message: 'The Basket not found.',
         statusCode: HttpStatus.NOT_FOUND,
       });
     }
@@ -336,7 +342,7 @@ export class ProductService {
     // Eğer kullanıcının sepeti yoksa, işlem yapmaya gerek yok
     if (!userWithCart.shoppingCart) {
       throw new RpcException({
-        message: 'The product is not in Basket.',
+        message: 'The Basket is not found.',
         statusCode: HttpStatus.NOT_FOUND,
       });
     }

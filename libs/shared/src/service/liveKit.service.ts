@@ -1,19 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 
 @Injectable()
 export class LivekitService {
-  private readonly roomService: RoomServiceClient;
+  private roomService: any;
 
   constructor() {
-    this.roomService = new RoomServiceClient(
-      process.env.LIVEKIT_URL, // LiveKit sunucu URL'si
-      process.env.LIVEKIT_API_KEY, // API anahtarı
-      process.env.LIVEKIT_API_SECRET, // API sırrı
+    this.initializeRoomService();
+  }
+
+  private async initializeRoomService() {
+    const LiveKit = await import('livekit-server-sdk');
+    this.roomService = new LiveKit.RoomServiceClient(
+      process.env.LIVEKIT_URL,
+      process.env.LIVEKIT_API_KEY,
+      process.env.LIVEKIT_API_SECRET,
     );
   }
 
-  generateToken(roomName: string, participantName: string): Promise<string> {
+  async generateToken(roomName: string, participantName: string) {
+    const { AccessToken } = await import('livekit-server-sdk');
     const token = new AccessToken(
       process.env.LIVEKIT_API_KEY,
       process.env.LIVEKIT_API_SECRET,
@@ -29,8 +34,9 @@ export class LivekitService {
   }
 
   async createRoom(roomName: string) {
-    return await this.roomService.createRoom({ name: roomName });
+    if (!this.roomService) {
+      await this.initializeRoomService();
+    }
+    return this.roomService.createRoom({ name: roomName });
   }
-
-  // Diğer LiveKit işlemleri
 }
